@@ -1,0 +1,61 @@
+# Daily-word local notifications in Expo (state as of 2026-07-03) — research brief
+
+## 0. Version baseline
+- **Current stable: Expo SDK 57**, released **2026-06-30** (RN 0.86, React 19.2; billed as a near-zero-breaking-change upgrade from SDK 56). SDK 56: 2026-05-21; SDK 55: 2026-02-25. ([changelog](https://expo.dev/changelog), [SDK 57 post](https://expo.dev/changelog/sdk-57))
+- **expo-notifications latest: 57.0.3** (published 2026-07-03, npm registry). Note the versioning scheme changed: `0.32.x` = SDK 54, then SDK-aligned `55.x / 56.x / 57.x`. Old `0.x` docs/blog posts are for pre-2026 SDKs.
+- `expo-background-fetch` is **deprecated** (SDK 53, April 2025) and replaced by **`expo-background-task`** (WorkManager on Android, BGTaskScheduler on iOS). ([Expo blog](https://expo.dev/blog/goodbye-background-fetch-hello-expo-background-task), [docs](https://docs.expo.dev/versions/latest/sdk/background-task/))
+
+## 1. Trigger APIs: do they still exist? (yes, with platform caveats)
+Per the SDK 57 docs ([docs.expo.dev/versions/latest/sdk/notifications](https://docs.expo.dev/versions/latest/sdk/notifications/)):
+
+| Trigger | Platforms | Shape |
+|---|---|---|
+| `DailyTriggerInput` | **iOS + Android** | `{ type: SchedulableTriggerInputTypes.DAILY, hour, minute, channelId? }` — repeats daily, fixed content |
+| `CalendarTriggerInput` | **iOS only** | `{ type: CALENDAR, hour?, minute?, weekday?, …, repeats?, timezone? }` — throws "not supported" on Android ([issue #8996](https://github.com/expo/expo/issues/8996)) |
+| `DateTriggerInput` | iOS + Android | `{ type: DATE, date: Date }` — one-shot at absolute time; **breaking change in 0.29.13 (Jan 2025): only accepts an object form, not a bare Date/number** |
+| `TimeIntervalTriggerInput` | iOS + Android | `{ type: TIME_INTERVAL, seconds, repeats }` |
+| `WeeklyTriggerInput` / `MonthlyTriggerInput` / `YearlyTriggerInput` | Android-oriented additions (monthly added in 0.29.0, Oct 2024) | |
+
+Recent API churn worth knowing: calendar trigger inputs were **simplified (breaking)** in 0.29.0; `DateTriggerInput` object-only in 0.29.13; data-only notification behavior changed (breaking) in 0.32.4 (Aug 2025). No deprecation of daily/calendar triggers — they're alive in SDK 57. ([expo-notifications CHANGELOG](https://github.com/expo/expo/blob/main/packages/expo-notifications/CHANGELOG.md))
+
+**Critical design fact (flagging an implicit assumption):** a repeating `DAILY`/`CALENDAR` trigger carries **static content** — you cannot vary the notification body per day with one repeating trigger. To put *that day's word* in the body you must pre-schedule **N individual `DATE`-trigger notifications**, one per day, each with its own content. The repeating triggers are only useful for a generic "Your word is ready" fallback.
+
+Expo Go caveat: since SDK 53, remote push is unavailable in Expo Go on Android; **local scheduled notifications require a development build to test properly** anyway — plan on dev builds, not Expo Go.
+
+## 2. iOS 64-slot limit + queue refresh pattern
+- The limit stands: **the system keeps only the 64 soonest-firing pending local notifications** per app and silently discards the rest (a repeating trigger counts as one slot). Apple's newer docs are vague but the behavior is confirmed current. ([Apple dev forums thread](https://developer.apple.com/forums/thread/811171), [flutter_local_notifications #2312](https://github.com/MaikuB/flutter_local_notifications/issues/2312))
+- **Best-practice pattern for a daily-word app:**
+  1. On every app foreground: `cancelAllScheduledNotificationsAsync()` (or diff via `getAllScheduledNotificationsAsync()`), then schedule the next **N days** of `DATE`-trigger notifications with per-day word content at the user's chosen time. Use N ≈ **30–60**, staying safely under 64 (leave headroom for any other notification types you add later).
+  2. Rebuild-from-scratch (cancel-all + reschedule) is the robust idiom — it self-heals timezone changes, time-preference changes, and word-list resyncs in one code path.
+  3. **Top-up in the background** with `expo-background-task`: register a task (min interval 15 min; default 12 h; WorkManager/BGTaskScheduler) that re-runs the same "rebuild queue" function. Treat it as **best-effort only**: the OS decides when it runs, it needs battery/network conditions, and **on iOS it will not run after the user force-quits (swipes away) the app** until next launch; Android behavior varies by vendor. ([expo-background-task docs](https://docs.expo.dev/versions/latest/sdk/background-task/))
+- Keep the scheduling function idempotent and derive content deterministically from `date → word` (your global-rotation function), so app-open, background-task, and notification-tap paths all agree.
+
+## 3. Android specifics
+- **Exact alarms:** since Android 12 (API 31), exact-time scheduling needs `SCHEDULE_EXACT_ALARM`. **expo-notifications does NOT add it automatically** — you must add it yourself (`android.permissions` in app.json). Since expo-notifications 0.16.0, a missing permission no longer throws; it **falls back to inexact scheduling**. On **Android 14+, `SCHEDULE_EXACT_ALARM` is denied by default** for newly installed apps targeting API 33+, and granting it requires sending the user to a special settings screen; `USE_EXACT_ALARM` is auto-granted but Play-policy-restricted to alarm/calendar/clock apps — **Emotionary would not qualify**. ([Android 14 changes](https://developer.android.com/about/versions/14/changes/schedule-exact-alarms), [alarms guide](https://developer.android.com/develop/background-work/services/alarms), [expo-notifications changelog 0.16.0](https://github.com/expo/expo/blob/main/packages/expo-notifications/CHANGELOG.md))
+  - **Recommendation:** do NOT chase exact alarms. Inexact daily delivery (typically within minutes; in deep Doze, deferred to a maintenance window) is fine for "word of the day." Document "delivered around your chosen time" rather than fighting Android 14 policy.
+- **Doze:** without exact alarms, delivery in Doze can slip; users report background-delay issues on real devices ([issue #5799](https://github.com/expo/expo/issues/5799), [issue #10700](https://github.com/expo/expo/issues/10700)). OEM battery killers (Xiaomi/Huawei/OnePlus etc.) can cancel alarms outright when they force-stop the app — the classic dontkillmyapp problem; nothing in JS can fully fix this.
+- **Channels:** required on Android 8+; on **Android 13+ create at least one channel via `setNotificationChannelAsync` before notification APIs**; `DailyTriggerInput`/`DateTriggerInput` accept `channelId` — create a dedicated "Daily word" channel so users can tune it independently. ([Expo docs](https://docs.expo.dev/versions/latest/sdk/notifications/))
+- **Reboot:** expo-notifications auto-adds `RECEIVE_BOOT_COMPLETED` and reschedules after reboot. A user "Force stop" from settings kills alarms until next app open.
+- **Android 13+ runtime permission:** `POST_NOTIFICATIONS` — `requestPermissionsAsync()` handles the prompt; denied = notifications silently dropped.
+
+## 4. Permission flow best practice
+- **Ask in context, not at cold launch:** show a value-framed pre-prompt (e.g., when the user sets their notification time in onboarding/Settings: "Get one word each morning — pick your time"), *then* call `requestPermissionsAsync()`. If the OS prompt is denied, iOS never re-prompts (must deep-link to Settings via `Linking.openSettings()`); check `getPermissionsAsync()` first and branch. ([codesofphoenix 2026 guide](https://www.codesofphoenix.com/articles/expo/local-notifications-expo))
+- **iOS provisional auth exists and works:** `requestPermissionsAsync({ ios: { allowProvisional: true } })` — no prompt, notifications delivered **quietly** (Notification Center only, no banner/sound/lock screen). Statuses surface as `ios.status`: `NOT_DETERMINED / DENIED / AUTHORIZED / PROVISIONAL / EPHEMERAL`. **Caveat for this app:** a quiet daily word is easy to never see; provisional is best used as a soft trial ("Keep receiving? / Turn off") with an in-app upsell to full authorization, not as the endgame. Full alert permission via the contextual prompt is the better primary path for a habit product with streaks.
+
+## 5. Queue exhaustion (app unopened for weeks) — pitfalls & mitigation
+- **The core pitfall:** with per-day content you can only pre-schedule ~60 days (iOS 64 cap; also practical staleness). If the user never opens the app and background tasks never fire (force-quit on iOS kills BGTaskScheduler; Android OEMs kill WorkManager), **notifications stop silently after N days**. No local-only mechanism fully escapes this.
+- **Mitigations (stackable):**
+  1. **Refresh on every foreground** (cheap, catches all active users) + `expo-background-task` top-up for semi-active users.
+  2. **Sentinel fallback:** make the last ~7 scheduled slots generic ("Your word of the day is waiting ✳") pointing into the app — content can't go stale, and tapping one triggers a full queue rebuild. A repeating `DAILY` trigger can't be start-delayed, so use dated generic notifications instead.
+  3. Consider **generic bodies everywhere** ("Today's word is ready") as a simplification — one repeating `DAILY` trigger per platform, one slot, zero exhaustion — at the cost of not showing the word on the lock screen. Recommend hybrid: worded bodies for the first N days, generic sentinels after.
+  4. Re-anchor on notification tap and on `timezone`/time-change events (dated `DATE` triggers are absolute UTC instants; a timezone move shifts perceived delivery time until the next rebuild — another reason for rebuild-on-foreground).
+  5. V2 escape hatch: server push (Expo Push/FCM/APNs) removes the cap entirely; your Supabase-only V1 decision is compatible — nothing in this local design blocks adding push later.
+
+## Corrections to your assumptions
+1. **`CalendarTriggerInput` is iOS-only** — it errors on Android. Cross-platform daily = `DailyTriggerInput`; per-day content = per-day `DateTriggerInput`s. Your framing "does it work on iOS and Android" — Daily: yes both; Calendar: iOS only.
+2. **Repeating triggers can't carry per-day words** — the "each notification body contains that day's word" requirement forces the pre-scheduled `DATE` queue + refresh architecture; there's no repeating-trigger shortcut.
+3. **"background fetch" is the old API** — use `expo-background-task` (SDK 53+); `expo-background-fetch` is deprecated and unmaintained.
+4. **Don't plan on exact alarms on Android** — denied-by-default on Android 14+ for this app category; design copy and product expectations around inexact ("around 9:00 AM") delivery.
+5. expo-notifications **version numbers jumped from 0.32.x to 55/56/57.x** (SDK-aligned) — pin guidance in the design doc to `expo-notifications@~57.x` / SDK 57, and disregard 0.x-era tutorials for API shapes (e.g., pre-0.29 calendar trigger shape, pre-0.29.13 DateTrigger shape).
+
+Sources: [Expo Notifications docs (SDK 57)](https://docs.expo.dev/versions/latest/sdk/notifications/) · [Expo changelog](https://expo.dev/changelog) · [Expo SDK 57 release](https://expo.dev/changelog/sdk-57) · [expo-background-task docs](https://docs.expo.dev/versions/latest/sdk/background-task/) · [Goodbye background-fetch (Expo blog)](https://expo.dev/blog/goodbye-background-fetch-hello-expo-background-task) · [expo-notifications CHANGELOG](https://github.com/expo/expo/blob/main/packages/expo-notifications/CHANGELOG.md) · [Apple forums: 64-notification limit](https://developer.apple.com/forums/thread/811171) · [flutter_local_notifications #2312 (64-limit practice)](https://github.com/MaikuB/flutter_local_notifications/issues/2312) · [Android 14 exact-alarm denial](https://developer.android.com/about/versions/14/changes/schedule-exact-alarms) · [Android alarms guide](https://developer.android.com/develop/background-work/services/alarms) · [expo/expo #5799 delayed Android notifications](https://github.com/expo/expo/issues/5799) · [expo/expo #8996 calendar trigger unsupported on Android](https://github.com/expo/expo/issues/8996) · [codesofphoenix Expo local notifications 2026](https://www.codesofphoenix.com/articles/expo/local-notifications-expo)

@@ -1,0 +1,55 @@
+# RevenueCat + Expo (post-launch add) — Research Brief, July 2026
+
+## 1. `react-native-purchases` with Expo
+
+- **Current version: 10.4.1** (latest on npm, published ~July 2026; 10.4.0 mid-June 2026). Peer deps: React ≥ 16.6.3, **React Native ≥ 0.73.0**; Android Kotlin ≥ 1.8.0. v10.x line also ships a Web target (purchases-js under the hood) and RevenueCat Paywalls via the sibling `react-native-purchases-ui` package. ([npm registry](https://registry.npmjs.org/react-native-purchases/latest), [GitHub releases](https://github.com/RevenueCat/react-native-purchases/releases), [repo README](https://github.com/RevenueCat/react-native-purchases))
+- **No config plugin required.** The repo ships no `app.plugin.js`; install is just `npx expo install react-native-purchases` (+ `react-native-purchases-ui` if you want their prebuilt paywalls) and it autolinks under Expo CNG/prebuild. Expo's own IAP guide lists react-native-purchases as a first-class option and confirms it works with CNG. ([Expo IAP guide](https://docs.expo.dev/guides/in-app-purchases/), [RevenueCat Expo docs](https://www.revenuecat.com/docs/getting-started/installation/expo))
+- **EAS Build: yes, fully supported and the documented path.** RevenueCat's Expo guide walks through `eas init` / `eas build:configure`; you need a **development build** (dev client) — hot-reloading the JS after adding the package without rebuilding throws `Invariant Violation: new NativeEventEmitter()`. iOS simulator builds work with an eas.json simulator profile (real purchases need a device + sandbox account). ([RevenueCat Expo docs](https://www.revenuecat.com/docs/getting-started/installation/expo))
+- **Expo Go caveat — better than you'd expect:** the SDK auto-detects Expo Go and switches to **"Preview API Mode"** — JS-level mocks so subscription UI/logic runs without crashing, but no real purchases. Real IAP testing always requires a dev build. ([RevenueCat Expo docs](https://www.revenuecat.com/docs/getting-started/installation/expo), [repo README](https://github.com/RevenueCat/react-native-purchases))
+- Practical consequence for you: since you're on Expo + EAS anyway, adding it later is `expo install` + one rebuild + dashboard config. No prebuild surgery.
+
+## 2. Anonymous app user IDs, no login
+
+- On first `Purchases.configure()`, the SDK generates an **anonymous App User ID** (`$RCAnonymousID:...`) cached on-device. It persists until the app is deleted. ([RevenueCat community](https://community.revenuecat.com/general-questions-7/restore-purchase-after-app-delete-and-reinstall-with-anonymous-user-198))
+- **Reinstall / new device:** a fresh anonymous ID is created. The user taps **Restore Purchases** → SDK sends the store receipt (Apple ID / Google Play account) to RevenueCat → entitlement is re-granted. With the **default restore behavior ("Transfer to new App User ID")**, when both sides are anonymous the IDs are **merged (aliased) into one customer profile**, so history follows the user. ([Restore behavior docs](https://www.revenuecat.com/docs/projects/restore-behavior))
+- RevenueCat explicitly recommends its built-in anonymous IDs (not self-generated random IDs) for no-login apps. ([community answer](https://community.revenuecat.com/general-questions-7/user-id-and-restoring-purchases-from-anonymous-id-3792))
+- **Limitations:**
+  - Restore is **per store account, per platform** — an iOS lifetime purchase cannot restore on Android and vice versa. Without accounts there is no cross-platform entitlement. (Inherent to store receipts; RevenueCat can't bridge it anonymously.)
+  - Restore is user-initiated — you must ship a visible "Restore Purchases" button (Apple review requires it). You can also call `Purchases.syncPurchases()` opportunistically.
+  - Anonymous ID churn inflates your RevenueCat customer counts (cosmetic, not billing-relevant). ([community](https://community.revenuecat.com/sdks-51/help-me-solve-anonymous-user-id-bloat-5664))
+  - If you ever add accounts later, `logIn()` merges the anonymous profile into the identified one — the migration path exists and is standard. ([Restore behavior docs](https://www.revenuecat.com/docs/projects/restore-behavior))
+
+## 3. One-time "lifetime unlock" vs subscription
+
+- **Entitlement model:** create one entitlement, e.g. `full_access`. Products attach to entitlements; **multiple products (a non-consumable AND a subscription) can unlock the same entitlement**, and a non-consumable attached to an entitlement unlocks it **forever**. Client code only ever checks `customerInfo.entitlements.active["full_access"]` — it never knows or cares which product granted it. ([Entitlements docs](https://www.revenuecat.com/docs/getting-started/entitlements), [Non-subscription purchases docs](https://www.revenuecat.com/docs/platform-resources/non-subscriptions))
+- **Switching later is NOT painful:** adding a subscription alongside (or after) a lifetime product = create the store product, attach it to the same entitlement, add it to your **Offering** in the dashboard. Offerings are fetched remotely, so the paywall's product lineup changes **without an app release** (the paywall UI itself needs to exist in the binary once). Existing lifetime buyers keep the entitlement forever.
+- **Known gotchas:**
+  - A user with an active subscription who buys lifetime keeps getting billed for the sub until they cancel it themselves — you must surface that. ([community](https://community.revenuecat.com/general-questions-7/what-happens-if-a-subscribed-user-purchases-lifetime-access-1156))
+  - Refunds of non-consumables don't always auto-revoke the entitlement (Apple refund events are handled, but watch this in the dashboard). ([community](https://community.revenuecat.com/dashboard-tools-52/how-to-remove-entitlement-when-lifetime-purchase-is-refunded-572))
+  - Store-side: iOS = non-consumable IAP; Android = one-time product. Both restore from the store account, consistent with §2.
+
+## 4. What to build into Emotionary NOW (zero-refactor checklist)
+
+Nothing is required in Supabase *for RevenueCat itself* — RevenueCat is the entitlement source of truth, needs no server, and works with your anonymous/offline-first model (the SDK caches `CustomerInfo` on-device, so entitlement checks work offline). The prep is a **client-side seam plus one cheap schema column**:
+
+1. **Single gating module in the client** (`entitlements.ts` or similar): `hasFullAccess(): boolean` and `canViewWord(word): boolean`, hard-coded to `true` in V1. Every surface (Browse cards, Word Detail, Share) routes through it. Later, swap the body for the RevenueCat entitlement check — one file changes.
+2. **Add `is_free boolean NOT NULL DEFAULT true` to the `words` table and seed JSON now.** This is the one genuine schema item: adding it later means a migration *plus* shipped clients that don't know the field. With it in place from day one, flipping the freemium split is a Postgres `UPDATE` — no app release. (If you might want tiering instead, use `free_tier`/`min_level`, but a boolean matches "unlock all words".)
+3. **Decide the daily-word rule now:** keep the deterministic rotation over all 127 words, but spec that *today's word is always free* (gating applies to the archive/Browse) — otherwise the core loop breaks for free users. Document it; costs nothing.
+4. **Never persist a homegrown `isPurchased` flag as source of truth** in AsyncStorage — always derive from RevenueCat's cached `CustomerInfo`, or restores/refunds will desync.
+5. **Reserve UI slots:** a "Restore Purchases" row in Settings and an upsell slot on Stats (next to the existing "Get the book" CTA). Designing the slots now avoids layout churn later.
+6. **Accept the security tradeoff:** with anon-readable PostgREST and no accounts, premium words are gated client-side only (a determined user could hit the API directly). That's normal for this app class; true server-side gating would require accounts + an edge function validating RevenueCat — explicitly out of scope, and adding RevenueCat webhooks → Supabase later is additive, not a refactor.
+
+## 5. RevenueCat pricing (2026)
+
+- **Pro plan: free up to $2,500 in Monthly Tracked Revenue (MTR), then 1% of MTR** above zero once you cross the threshold. All features (paywalls, A/B testing, integrations, analytics) included — no feature-gated tiers. Enterprise is custom for high volume. ([revenuecat.com/pricing](https://www.revenuecat.com/pricing), [costbench summary](https://costbench.com/software/subscription-billing/revenuecat/))
+- Note: MTR is **gross revenue before the store's 15–30% cut**, so the effective rate on net proceeds is ~1.2–1.4%. ([pricing analyses](https://toolradar.com/tools/revenuecat/pricing))
+- For Emotionary this means RevenueCat is literally $0 until the app earns >$2.5k/month.
+
+## Assumption check (things in your brief that need flagging)
+
+- ✅ "RevenueCat can be added later without schema/architecture changes" — **almost true, with one exception**: add the `is_free` column (item 4.2) *now*; it's the only thing that becomes a real migration + old-client problem if deferred.
+- ✅ Expo choice is fine; no config plugin, works with EAS Build, and Expo Go development stays viable via Preview API Mode.
+- ⚠️ "No user accounts in V1" is compatible with RevenueCat, but be aware entitlements will be **per-platform** (no iOS↔Android restore) until/unless accounts exist. Fine for a one-time unlock at this price point; worth one line in the design doc.
+- ⚠️ Nothing in your plan mentions a Restore Purchases affordance — Apple requires it once IAP exists; reserve the Settings row now.
+
+Sources: [RevenueCat Expo installation docs](https://www.revenuecat.com/docs/getting-started/installation/expo) · [Expo in-app purchases guide](https://docs.expo.dev/guides/in-app-purchases/) · [react-native-purchases GitHub](https://github.com/RevenueCat/react-native-purchases) · [releases](https://github.com/RevenueCat/react-native-purchases/releases) · [npm registry (10.4.1)](https://registry.npmjs.org/react-native-purchases/latest) · [Entitlements docs](https://www.revenuecat.com/docs/getting-started/entitlements) · [Non-subscription purchases](https://www.revenuecat.com/docs/platform-resources/non-subscriptions) · [Restore behavior](https://www.revenuecat.com/docs/projects/restore-behavior) · [Anonymous restore community thread](https://community.revenuecat.com/general-questions-7/restore-purchase-after-app-delete-and-reinstall-with-anonymous-user-198) · [Anonymous ID recommendation](https://community.revenuecat.com/general-questions-7/user-id-and-restoring-purchases-from-anonymous-id-3792) · [Sub + lifetime overlap](https://community.revenuecat.com/general-questions-7/what-happens-if-a-subscribed-user-purchases-lifetime-access-1156) · [Lifetime refund thread](https://community.revenuecat.com/dashboard-tools-52/how-to-remove-entitlement-when-lifetime-purchase-is-refunded-572) · [RevenueCat pricing](https://www.revenuecat.com/pricing) · [costbench pricing summary](https://costbench.com/software/subscription-billing/revenuecat/) · [toolradar pricing analysis](https://toolradar.com/tools/revenuecat/pricing)
