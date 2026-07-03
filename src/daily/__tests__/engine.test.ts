@@ -54,18 +54,28 @@ describe('protocol primitives (GOLDEN — changing any value requires bumping SE
     expect(daysSinceEpoch('2028-02-29')).toBe(21243); // leap day
   });
 
-  test('golden daily words for the dev seed', () => {
-    expect(monthPermutation(seedWords, '2026-07').slice(0, 5).map((w) => w.slug)).toEqual([
-      'anhedonia',
-      'acedia',
-      'languishing',
-      'natsukashii',
-      'halcyon',
+  test('golden daily words for a fixed synthetic word list (content-independent)', () => {
+    // Synthetic fixtures, NOT the bundled seed — content imports and the
+    // local-ids → cloud-uuids migration must never break protocol pins.
+    const fixture = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel'].map(
+      (s) => makeWord(s, '2025-12-01T00:00:00.000Z'),
+    );
+    // makeWord ids are `local-<slug>`; pin against `fixture-<slug>` ordering instead
+    const fixtureIds = fixture.map((w) => ({ ...w, id: `fixture-${w.slug}` }));
+    expect(monthPermutation(fixtureIds, '2026-07').map((w) => w.slug)).toEqual([
+      'alpha',
+      'foxtrot',
+      'echo',
+      'charlie',
+      'bravo',
+      'golf',
+      'delta',
+      'hotel',
     ]);
-    expect(wordOfDay(seedWords, '2026-07-03')?.slug).toBe('acedia');
-    expect(wordOfDay(seedWords, '2026-07-04')?.slug).toBe('languishing');
-    expect(wordOfDay(seedWords, '2026-07-31')?.slug).toBe('eustress');
-    expect(wordOfDay(seedWords, '2026-08-01')?.slug).toBe('toska');
+    expect(wordOfDay(fixtureIds, '2026-07-03')?.slug).toBe('golf');
+    expect(wordOfDay(fixtureIds, '2026-07-04')?.slug).toBe('delta');
+    expect(wordOfDay(fixtureIds, '2026-07-31')?.slug).toBe('foxtrot');
+    expect(wordOfDay(fixtureIds, '2026-08-01')?.slug).toBe('alpha');
   });
 });
 

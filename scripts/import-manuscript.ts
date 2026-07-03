@@ -130,9 +130,27 @@ async function main() {
   validate(words);
   console.log(`Importing ${words.length} words from ${input} …`);
 
+  // Backdating published_at is ONLY for the initial bootstrap import (empty
+  // table) — it pre-populates the monthly-frozen rotation (DESIGN.md §6.1).
+  // On later imports, new rows arrive as unpublished drafts so publishing
+  // (and the published_at = now() trigger) stays in the founder's hands and
+  // new words join the rotation at the next month boundary, never mid-month.
+  const probe = await fetch(`${url}/rest/v1/words?select=id&limit=1`, {
+    headers: { apikey: key, Prefer: 'count=exact' },
+  });
+  if (!probe.ok) {
+    console.error(`✗ Could not check table state: HTTP ${probe.status}`);
+    process.exit(1);
+  }
+  const existing = Number((probe.headers.get('content-range') ?? '').split('/')[1]);
+  const isBootstrap = existing === 0;
+  console.log(
+    isBootstrap
+      ? '  Empty table — bootstrap import: publishing all with backdated published_at.'
+      : `  Table has ${existing} rows — new entries import as unpublished drafts.`,
+  );
+
   // Upsert by slug via PostgREST: on_conflict=slug + resolution=merge-duplicates.
-  // published/published_at are only set for NEW rows (missing_default) — an
-  // existing row's publish state is the founder's to manage in Studio.
   const payload = words.map((w) => ({
     slug: w.slug,
     word: w.word,
@@ -143,8 +161,7 @@ async function main() {
     definition: w.definition,
     wisdom: w.wisdom,
     is_free: w.is_free ?? true,
-    published: true,
-    published_at: BACKDATED_PUBLISHED_AT,
+    ...(isBootstrap ? { published: true, published_at: BACKDATED_PUBLISHED_AT } : {}),
   }));
 
   const res = await fetch(`${url}/rest/v1/words?on_conflict=slug`, {
