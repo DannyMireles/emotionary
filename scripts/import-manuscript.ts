@@ -38,6 +38,10 @@ interface MasterWord {
   is_free?: boolean;
 }
 
+function serviceHeaders(key: string): Record<string, string> {
+  return { apikey: key, Authorization: `Bearer ${key}` };
+}
+
 /** Minimal RFC-4180 CSV parser (quoted fields, embedded commas/newlines). */
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -138,7 +142,7 @@ async function main() {
   // (and the published_at = now() trigger) stays in the founder's hands and
   // new words join the rotation at the next month boundary, never mid-month.
   const probe = await fetch(`${url}/rest/v1/words?select=id&limit=1`, {
-    headers: { apikey: key, Prefer: 'count=exact' },
+    headers: { ...serviceHeaders(key), Prefer: 'count=exact' },
   });
   if (!probe.ok) {
     console.error(`✗ Could not check table state: HTTP ${probe.status}`);
@@ -172,7 +176,7 @@ async function main() {
   const res = await fetch(`${url}/rest/v1/words?on_conflict=slug`, {
     method: 'POST',
     headers: {
-      apikey: key,
+      ...serviceHeaders(key),
       'Content-Type': 'application/json',
       Prefer: 'resolution=merge-duplicates,return=minimal',
     },

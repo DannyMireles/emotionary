@@ -33,8 +33,10 @@ interface ContentState {
 }
 
 function restHeaders(): Record<string, string> {
-  // Publishable keys go in the apikey header ONLY (not Authorization).
-  return { apikey: SUPABASE_PUBLISHABLE_KEY };
+  return {
+    apikey: SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+  };
 }
 
 async function fetchStamp(): Promise<ContentStamp | null> {

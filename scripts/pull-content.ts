@@ -47,7 +47,7 @@ interface SeedWord {
 }
 
 async function fromSupabase(url: string, key: string) {
-  const headers = { apikey: key };
+  const headers = { apikey: key, Authorization: `Bearer ${key}` };
   const probe = await fetch(
     `${url}/rest/v1/words?select=updated_at&order=updated_at.desc&limit=1`,
     { headers: { ...headers, Prefer: 'count=exact' } },

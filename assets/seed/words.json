@@ -1,6 +1,7 @@
 {
   "words": [
     {
+      "id": "cf944767-2039-40c8-bd55-6c1c0256bedb",
       "slug": "acedia",
       "word": "Acedia",
       "pronunciation": "uh-SEE-dee-ah",
@@ -10,11 +11,11 @@
       "definition": "The 'noonday demon' of the old monks; a listless spiritual weariness in which nothing seems worth wanting, doing, or caring about.",
       "wisdom": "Even the desert fathers lost heart at noon. Begin again at one.",
       "is_free": true,
-      "id": "local-acedia",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "ba7ee97c-ac7a-4f5c-a76c-c779d316c419",
       "slug": "alexithymia",
       "word": "Alexithymia",
       "pronunciation": "uh-lek-sih-THY-mee-ah",
@@ -24,11 +25,11 @@
       "definition": "Difficulty identifying and describing one's own emotions; sensing that something is happening inside without being able to name what it is.",
       "wisdom": "Not having the word yet doesn't mean the feeling isn't real.",
       "is_free": true,
-      "id": "local-alexithymia",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "772566f7-17c0-4323-bc66-40fe0073ccfa",
       "slug": "ambivalence",
       "word": "Ambivalence",
       "pronunciation": "am-BIV-uh-lence",
@@ -38,11 +39,11 @@
       "definition": "Holding two opposing feelings about the same thing at once; love and resentment, wanting and dreading; both fully real.",
       "wisdom": "You can be torn and still be whole.",
       "is_free": true,
-      "id": "local-ambivalence",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "de856d84-9372-4245-b92d-55a2b8400bcc",
       "slug": "anhedonia",
       "word": "Anhedonia",
       "pronunciation": "an-hee-DOH-nee-ah",
@@ -52,11 +53,11 @@
       "definition": "The reduced ability to feel pleasure; when activities that once brought joy feel flat, distant, or simply beside the point.",
       "wisdom": "Numbness is not the absence of feeling. It's a feeling asking for help.",
       "is_free": true,
-      "id": "local-anhedonia",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "14560f8f-cf2b-41d1-8ac2-07871ef8698a",
       "slug": "apricity",
       "word": "Apricity",
       "pronunciation": "uh-PRIS-ih-tee",
@@ -66,11 +67,11 @@
       "definition": "The warmth of the sun on a cold winter's day; small, specific, and disproportionately comforting.",
       "wisdom": "Sometimes all you need is five minutes of light.",
       "is_free": true,
-      "id": "local-apricity",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "2cc41ecd-dd75-4037-8f78-ffbb578c17ad",
       "slug": "catharsis",
       "word": "Catharsis",
       "pronunciation": "kuh-THAR-sis",
@@ -80,11 +81,11 @@
       "definition": "The purging release of pent-up emotion; the cry, the confession, the scream into the sea; and the strange lightness after.",
       "wisdom": "Feelings leave more gently when given a door.",
       "is_free": true,
-      "id": "local-catharsis",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "46cbe6d1-1c9c-47ee-850f-0dd6248d21c4",
       "slug": "chrysalism",
       "word": "Chrysalism",
       "pronunciation": "KRIS-uh-liz-um",
@@ -94,11 +95,11 @@
       "definition": "The amniotic tranquility of being indoors during a thunderstorm; sheltered, small, and strangely safe while the sky argues outside.",
       "wisdom": "Storms are kinder with a roof between you.",
       "is_free": true,
-      "id": "local-chrysalism",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "fd38f2a9-02a7-4268-93bb-246e24c4ff53",
       "slug": "depaysement",
       "word": "Dépaysement",
       "pronunciation": "day-pey-eez-MAHN",
@@ -108,11 +109,11 @@
       "definition": "The disorientation of being far from home; unmoored, foreign to your surroundings and slightly to yourself. Equal parts unease and freedom.",
       "wisdom": "You have to lose your bearings to find new ones.",
       "is_free": true,
-      "id": "local-depaysement",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "17fadb0c-b3b0-4cdf-bdee-011ebc3a3ba1",
       "slug": "duende",
       "word": "Duende",
       "pronunciation": "doo-EN-deh",
@@ -122,11 +123,11 @@
       "definition": "The dark, electric spirit that seizes you in the presence of raw art; a shiver of soul that cannot be faked, only summoned.",
       "wisdom": "Some beauty doesn't soothe. It possesses.",
       "is_free": true,
-      "id": "local-duende",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "3876e550-2398-48aa-9b41-6c15883aa7e0",
       "slug": "dysphoria",
       "word": "Dysphoria",
       "pronunciation": "dis-FOR-ee-ah",
@@ -136,11 +137,11 @@
       "definition": "A profound state of unease or dissatisfaction; the opposite of euphoria; a wrongness felt in the body before it can be explained.",
       "wisdom": "Discomfort is information. Listen before you judge it.",
       "is_free": true,
-      "id": "local-dysphoria",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "c0c69d3d-9f6c-4feb-b685-cfbf2a48463d",
       "slug": "eustress",
       "word": "Eustress",
       "pronunciation": "YOO-stress",
@@ -150,11 +151,11 @@
       "definition": "Positive stress; the flutter before the performance, the good pressure of a challenge you chose. Stress wearing its best clothes.",
       "wisdom": "Not every racing heart is a warning. Some are invitations.",
       "is_free": true,
-      "id": "local-eustress",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "d7e6ed20-1395-4834-ae37-e1af1a9d361c",
       "slug": "fernweh",
       "word": "Fernweh",
       "pronunciation": "FEIRN-vey",
@@ -164,11 +165,11 @@
       "definition": "An ache for distant places you've never been; a homesickness for somewhere unknown. The opposite of nostalgia: a longing that points forward, outward, away.",
       "wisdom": "Sometimes the heart is homesick for a place it hasn't found yet.",
       "is_free": true,
-      "id": "local-fernweh",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "4606bd13-592d-4f1a-8428-cd4c923b3324",
       "slug": "firgun",
       "word": "Firgun",
       "pronunciation": "feer-GOON",
@@ -178,11 +179,11 @@
       "definition": "Simple, generous delight in another person's success; pride with no ownership, applause with no footnote.",
       "wisdom": "Cheering costs nothing and pays twice.",
       "is_free": true,
-      "id": "local-firgun",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "746820c2-bdd0-42b1-b998-4b767d8a9ead",
       "slug": "flow",
       "word": "Flow",
       "pronunciation": "FLOH",
@@ -192,11 +193,11 @@
       "definition": "Complete absorption in what you're doing; time dissolves, self-consciousness quiets, and the task and you briefly become the same thing.",
       "wisdom": "Happiness often arrives disguised as concentration.",
       "is_free": true,
-      "id": "local-flow",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "3782ac18-46e4-4b4c-8028-97546145e59b",
       "slug": "gigil",
       "word": "Gigil",
       "pronunciation": "GHEE-ghil",
@@ -206,11 +207,11 @@
       "definition": "The trembling, gritted-teeth urge to squeeze something unbearably cute; affection so intense the body doesn't know where to put it.",
       "wisdom": "Some feelings are too big for words. That's what arms are for.",
       "is_free": true,
-      "id": "local-gigil",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "44f0ac57-4776-4478-bcfa-b84c6e67a200",
       "slug": "halcyon",
       "word": "Halcyon",
       "pronunciation": "HAL-see-un",
@@ -220,11 +221,11 @@
       "definition": "Belonging to a golden stretch of the past; calm, sunlit days remembered as gentler than the present ever feels.",
       "wisdom": "Every era turns golden if you carry it far enough.",
       "is_free": true,
-      "id": "local-halcyon",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "c4d2ace4-8454-475e-af50-4883f0f1310b",
       "slug": "hiraeth",
       "word": "Hiraeth",
       "pronunciation": "HEER-eyeth",
@@ -234,11 +235,11 @@
       "definition": "A homesickness for a home you cannot return to; or one that never quite existed. Longing braided with grief, nostalgia, and love for the lost places of your past.",
       "wisdom": "You can miss a place that only ever existed inside you.",
       "is_free": true,
-      "id": "local-hiraeth",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "7cfe59d1-e4bf-47a3-a004-7efa23a85f34",
       "slug": "hygge",
       "word": "Hygge",
       "pronunciation": "HOO-gah",
@@ -248,11 +249,11 @@
       "definition": "A deep, deliberate coziness; the warm contentment of candlelight, good company, and nowhere else to be. Comfort raised to a way of life.",
       "wisdom": "Contentment is rarely found. Mostly, it's made.",
       "is_free": true,
-      "id": "local-hygge",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "423a0fc1-9a65-42a2-938a-1b9dfa79d09f",
       "slug": "iktsuarpok",
       "word": "Iktsuarpok",
       "pronunciation": "ik-TSOO-ar-pok",
@@ -262,11 +263,11 @@
       "definition": "The restless anticipation of waiting for someone to arrive; checking the window, stepping outside, listening for footsteps that aren't there yet.",
       "wisdom": "Waiting is love with nowhere to go yet.",
       "is_free": true,
-      "id": "local-iktsuarpok",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "5d5638ff-081a-4c32-9199-fec1ebc8f279",
       "slug": "kilig",
       "word": "Kilig",
       "pronunciation": "KEE-lig",
@@ -276,11 +277,11 @@
       "definition": "The giddy, butterflies-in-the-stomach rush of a romantic moment; a glance, a message, a hand almost touching yours.",
       "wisdom": "Let yourself be swept. That's what the feeling is for.",
       "is_free": true,
-      "id": "local-kilig",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "efe007e9-2fa3-4a07-a4ba-dd587cc31f6e",
       "slug": "komorebi",
       "word": "Komorebi",
       "pronunciation": "koh-moh-REH-bee",
@@ -290,11 +291,11 @@
       "definition": "The dappled sunlight that filters through the leaves of trees; and the quiet, particular mood of standing beneath it.",
       "wisdom": "Beauty rarely announces itself. Look up.",
       "is_free": true,
-      "id": "local-komorebi",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "b2254424-0ba8-4058-b1a9-eaef7429eca6",
       "slug": "languishing",
       "word": "Languishing",
       "pronunciation": "LANG-gwish-ing",
@@ -304,11 +305,11 @@
       "definition": "A sense of stagnation and emptiness; not depression, not flourishing, but the muted, foggy middle where motivation quietly thins.",
       "wisdom": "Naming the fog is the first step out of it.",
       "is_free": true,
-      "id": "local-languishing",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "3a620342-c77c-4a8f-b577-077f90e46576",
       "slug": "limerence",
       "word": "Limerence",
       "pronunciation": "LIM-er-ence",
@@ -318,11 +319,11 @@
       "definition": "An involuntary state of intense romantic infatuation; obsessive thoughts, euphoric highs, and an aching hunger for the feeling to be returned.",
       "wisdom": "Infatuation is a wave. You can ride it without drowning.",
       "is_free": true,
-      "id": "local-limerence",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "93843383-234d-4e2f-bcfa-64136469bffd",
       "slug": "meraki",
       "word": "Meraki",
       "pronunciation": "meh-RAH-kee",
@@ -332,11 +333,11 @@
       "definition": "To do something with soul; leaving a piece of yourself in your work, whether it's a meal, a letter, or a life.",
       "wisdom": "What you love leaves fingerprints.",
       "is_free": true,
-      "id": "local-meraki",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "39d9414e-fe79-48f7-ba49-3fcba3bef009",
       "slug": "monachopsis",
       "word": "Monachopsis",
       "pronunciation": "mon-ah-KOP-sis",
@@ -346,11 +347,11 @@
       "definition": "The subtle, persistent feeling of being out of place; the sense that you were issued to the wrong setting, and everyone else got the map.",
       "wisdom": "Feeling out of place is proof you're still looking for yours.",
       "is_free": true,
-      "id": "local-monachopsis",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "b3fd8426-0be9-4e9f-8441-7da353272a3e",
       "slug": "mono-no-aware",
       "word": "Mono no aware",
       "pronunciation": "MOH-noh noh ah-WAH-reh",
@@ -360,11 +361,11 @@
       "definition": "A gentle, bittersweet sensitivity to the passing of things; the ache inside beauty, felt precisely because it will not stay.",
       "wisdom": "It moves you because it is already leaving.",
       "is_free": true,
-      "id": "local-mono-no-aware",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "76c07912-8fd3-4c8b-8d89-995deb820cc8",
       "slug": "mudita",
       "word": "Mudita",
       "pronunciation": "moo-DEE-tah",
@@ -374,11 +375,11 @@
       "definition": "Joy taken in someone else's joy; happiness for another's good fortune, with no envy attached and nothing in it for you.",
       "wisdom": "Another person's light doesn't dim yours.",
       "is_free": true,
-      "id": "local-mudita",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "48dbdd8a-8e4f-4e6d-b178-a66e97d90d11",
       "slug": "natsukashii",
       "word": "Natsukashii",
       "pronunciation": "nah-tsoo-kah-SHEE",
@@ -388,11 +389,11 @@
       "definition": "A warm, smiling nostalgia triggered by something small; a song, a smell, a certain summer light. Happy remembering, without the sting.",
       "wisdom": "Not all longing looks backward in tears.",
       "is_free": true,
-      "id": "local-natsukashii",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "45aa9af2-2ca2-4cd7-920a-cc983b299a2d",
       "slug": "nostalgia",
       "word": "Nostalgia",
       "pronunciation": "nos-TAL-jah",
@@ -402,11 +403,11 @@
       "definition": "Once diagnosed as an illness of soldiers far from home; now the bittersweet ache of remembering what was sweet precisely because it is over.",
       "wisdom": "Memory sweetens what time removes.",
       "is_free": true,
-      "id": "local-nostalgia",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "eb7f3bed-1267-49f4-8e46-9cdd2ff16c10",
       "slug": "petrichor",
       "word": "Petrichor",
       "pronunciation": "PET-rih-kor",
@@ -416,11 +417,11 @@
       "definition": "The smell of earth after rain; and the wave of memory and calm it releases, older than language.",
       "wisdom": "Some comforts arrive through the senses, not the mind.",
       "is_free": true,
-      "id": "local-petrichor",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "42353013-e0c7-427d-99f1-d2554ee8a56b",
       "slug": "redamancy",
       "word": "Redamancy",
       "pronunciation": "reh-DAM-un-see",
@@ -430,11 +431,11 @@
       "definition": "The act of loving someone who loves you back; love returned in full, meeting itself in the middle.",
       "wisdom": "The rarest luxury is symmetry.",
       "is_free": true,
-      "id": "local-redamancy",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "847f40ce-e9bf-496d-ac5e-02f79ff34769",
       "slug": "retrouvailles",
       "word": "Retrouvailles",
       "pronunciation": "ruh-troo-VYE",
@@ -444,11 +445,11 @@
       "definition": "The rush of joy at reuniting with someone after a long separation; the moment absence finally pays its debt.",
       "wisdom": "Distance is the price. Reunion is the interest.",
       "is_free": true,
-      "id": "local-retrouvailles",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "510239d2-0fe9-48ce-bc70-b3154887a9fd",
       "slug": "rumination",
       "word": "Rumination",
       "pronunciation": "roo-mih-NAY-shun",
@@ -458,11 +459,11 @@
       "definition": "Chewing the same distressing thoughts over and over; replaying, rehearsing, re-litigating; without moving an inch toward relief.",
       "wisdom": "A thought worth thinking once is rarely worth thinking fifty times.",
       "is_free": true,
-      "id": "local-rumination",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "340a4764-ee9c-418d-870a-2f99473abfde",
       "slug": "saudade",
       "word": "Saudade",
       "pronunciation": "sow-DAH-day",
@@ -472,11 +473,11 @@
       "definition": "A deep, bittersweet longing for something or someone you love that is gone, distant, or may never have existed at all. Not quite grief, not quite nostalgia; something in between that feels strangely beautiful even as it aches.",
       "wisdom": "Saudade isn't asking to be fixed. It's asking to be felt.",
       "is_free": true,
-      "id": "local-saudade",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "6afd4611-876d-409b-9676-5263dc6b323b",
       "slug": "schadenfreude",
       "word": "Schadenfreude",
       "pronunciation": "SHAH-den-froy-duh",
@@ -486,11 +487,11 @@
       "definition": "The guilty flicker of pleasure at someone else's misfortune; small, human, and rarely admitted out loud.",
       "wisdom": "Naming the ugly feelings shrinks them.",
       "is_free": true,
-      "id": "local-schadenfreude",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "4c402162-f4f0-405a-89a3-a18778311566",
       "slug": "sehnsucht",
       "word": "Sehnsucht",
       "pronunciation": "ZEYN-zookht",
@@ -500,11 +501,11 @@
       "definition": "An intense, indescribable yearning for something far away and undefined; a life, a place, or a feeling you can't name but recognize the instant it brushes past you.",
       "wisdom": "Some longings are compasses, not wounds.",
       "is_free": true,
-      "id": "local-sehnsucht",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "e51342a5-f081-418c-b48b-572258726c2d",
       "slug": "solivagant",
       "word": "Solivagant",
       "pronunciation": "soh-LIV-uh-gunt",
@@ -514,11 +515,11 @@
       "definition": "One who wanders alone; and the particular mood of solitary travel: self-contained, watchful, quietly free.",
       "wisdom": "Traveling alone, you meet yourself at every corner.",
       "is_free": true,
-      "id": "local-solivagant",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "32c8c8ba-db5d-48f2-a2ee-d075c266c599",
       "slug": "sonder",
       "word": "Sonder",
       "pronunciation": "SON-der",
@@ -528,11 +529,11 @@
       "definition": "The sudden realization that each passerby is living a life as vivid and complicated as your own, full of ambitions, friendships, and private sorrows you will never see.",
       "wisdom": "You are the main character of exactly one story. So is everyone you pass.",
       "is_free": true,
-      "id": "local-sonder",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "000f0a11-ffa9-466f-a019-bbddf3572a02",
       "slug": "torschlusspanik",
       "word": "Torschlusspanik",
       "pronunciation": "TOR-shloos-pah-nik",
@@ -542,11 +543,11 @@
       "definition": "Literally 'gate-closing panic'; the fear of time running out: doors closing, options narrowing, life happening somewhere without you.",
       "wisdom": "Panic counts the doors. Purpose walks through one.",
       "is_free": true,
-      "id": "local-torschlusspanik",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "dfda9aaa-bdf5-4cd6-aeb2-8821e10d6249",
       "slug": "toska",
       "word": "Toska",
       "pronunciation": "tahs-KAH",
@@ -556,11 +557,11 @@
       "definition": "A dull ache of the soul; a deep, restless longing with nothing in particular to long for; sometimes vague and quiet, sometimes a true sickness of the spirit.",
       "wisdom": "Some aches aren't asking for a cure. They're asking for company.",
       "is_free": true,
-      "id": "local-toska",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "30b83fb9-4578-4005-9710-7a844a3a8267",
       "slug": "vellichor",
       "word": "Vellichor",
       "pronunciation": "VEL-ih-kor",
@@ -570,11 +571,11 @@
       "definition": "The strange wistfulness of used bookstores; shelves of other people's stories, each spine holding a life you will never fully enter.",
       "wisdom": "Every shelf holds someone else's longing.",
       "is_free": true,
-      "id": "local-vellichor",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "d2767524-550d-4b12-a477-44c642f7701b",
       "slug": "wabi-sabi",
       "word": "Wabi-sabi",
       "pronunciation": "WAH-bee SAH-bee",
@@ -584,11 +585,11 @@
       "definition": "A way of seeing that finds beauty in imperfection and impermanence; the cracked bowl, the weathered wood, the fleeting season. Nothing lasts, nothing is finished, nothing is perfect.",
       "wisdom": "The crack is where the character gets in.",
       "is_free": true,
-      "id": "local-wabi-sabi",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "048cd65c-a9a0-49ad-a711-2d0290d1d962",
       "slug": "waldeinsamkeit",
       "word": "Waldeinsamkeit",
       "pronunciation": "VALD-ine-zahm-kite",
@@ -598,11 +599,11 @@
       "definition": "The feeling of being alone in the woods; solitude among trees, where being unaccompanied stops being lonely and starts feeling sacred.",
       "wisdom": "Alone is a place. Visit it kindly.",
       "is_free": true,
-      "id": "local-waldeinsamkeit",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     },
     {
+      "id": "f319fbf6-d1f5-45b3-bdae-05ea30a12bdb",
       "slug": "woolgathering",
       "word": "Woolgathering",
       "pronunciation": "WOOL-gath-er-ing",
@@ -612,13 +613,12 @@
       "definition": "Idle, drifting daydreaming; the mind wandering off to gather wool while the body stays politely behind.",
       "wisdom": "Not all wandering minds are lost.",
       "is_free": true,
-      "id": "local-woolgathering",
-      "published_at": "2026-01-01T00:00:00.000Z",
-      "updated_at": "2026-07-01T00:00:00.000Z"
+      "published_at": "2026-01-01T00:00:00+00:00",
+      "updated_at": "2026-07-06T17:13:15.272193+00:00"
     }
   ],
   "stamp": {
-    "maxUpdatedAt": "2026-07-01T00:00:00.000Z",
+    "maxUpdatedAt": "2026-07-06T17:13:15.272193+00:00",
     "count": 44
   }
 }

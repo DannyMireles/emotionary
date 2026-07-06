@@ -45,6 +45,8 @@ create index words_updated_at_idx on public.words (updated_at);
 -- RLS: anonymous read-only on published words; default-deny everything else.
 alter table public.words enable row level security;
 
+grant select on public.words to anon, authenticated;
+
 create policy "public read published words" on public.words
   for select to anon, authenticated
   using (published);

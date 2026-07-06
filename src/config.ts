@@ -1,7 +1,7 @@
 /**
  * Supabase connection config. Both values are safe to ship in the app
  * (the publishable key is designed for client embedding; RLS enforces
- * read-only access to published words — DESIGN.md §6.2).
+ * read-only access to published words through RLS — DESIGN.md §6.2).
  *
  * When unset (e.g. before the cloud project is linked), the app runs in
  * offline-only mode from the bundled seed — by design, nothing breaks.
