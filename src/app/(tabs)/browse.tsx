@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WordCard } from '@/components/WordCard';
@@ -58,6 +58,8 @@ export default function BrowseScreen() {
         autoCorrect={false}
         accessibilityLabel="Search words"
         clearButtonMode="while-editing"
+        returnKeyType="search"
+        onSubmitEditing={Keyboard.dismiss}
       />
 
       <View style={styles.chipsWrap}>
@@ -67,6 +69,7 @@ export default function BrowseScreen() {
             <Pressable
               key={f.key}
               onPress={() => {
+                Keyboard.dismiss();
                 selectionHaptic();
                 setTypeFilter(f.key);
               }}
@@ -87,6 +90,7 @@ export default function BrowseScreen() {
       <View style={styles.levelRow}>
         <Pressable
           onPress={() => {
+            Keyboard.dismiss();
             selectionHaptic();
             setLevelFilter(0);
           }}
@@ -105,6 +109,7 @@ export default function BrowseScreen() {
             <Pressable
               key={lvl}
               onPress={() => {
+                Keyboard.dismiss();
                 selectionHaptic();
                 setLevelFilter(active ? 0 : lvl);
               }}
@@ -128,12 +133,15 @@ export default function BrowseScreen() {
         renderItem={({ item }) => <WordCard word={item} />}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        onScrollBeginDrag={Keyboard.dismiss}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyText}>No words match.</Text>
             {hasActiveFilters && (
               <Pressable
                 onPress={() => {
+                  Keyboard.dismiss();
                   selectionHaptic();
                   setQuery('');
                   setTypeFilter('all');
