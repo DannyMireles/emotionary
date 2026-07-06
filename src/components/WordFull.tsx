@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { TypeBadge } from '@/components/TypeBadge';
 import type { Word } from '@/content/types';
+import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/tokens';
 
@@ -42,7 +43,10 @@ export function WordFull({ word }: { word: Word }) {
           <Text style={styles.fromBook}>from Emotionary, the book</Text>
           <View style={styles.actions}>
             <Pressable
-              onPress={() => toggleFavorite(word.slug)}
+              onPress={() => {
+                lightImpactHaptic();
+                toggleFavorite(word.slug);
+              }}
               style={styles.action}
               accessibilityRole="button"
               accessibilityLabel={isFavorite ? 'Remove from saved words' : 'Save this word'}
@@ -54,7 +58,10 @@ export function WordFull({ word }: { word: Word }) {
               <Text style={styles.actionLabel}>{isFavorite ? 'SAVED' : 'SAVE'}</Text>
             </Pressable>
             <Pressable
-              onPress={() => router.push(`/share/${word.slug}`)}
+              onPress={() => {
+                selectionHaptic();
+                router.push(`/share/${word.slug}`);
+              }}
               style={styles.action}
               accessibilityRole="button"
               accessibilityLabel="Share this word as an image card"

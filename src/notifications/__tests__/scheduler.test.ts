@@ -1,10 +1,18 @@
 import { notificationBody } from '@/notifications/scheduler';
 
 describe('notificationBody (first clause, ≤ ~100 chars)', () => {
-  test('cuts at an em-dash clause boundary', () => {
+  test('cuts at a legacy em-dash clause boundary', () => {
     expect(
       notificationBody(
         'The warmth of the sun on a cold winter’s day — small, specific, and disproportionately comforting.',
+      ),
+    ).toBe('The warmth of the sun on a cold winter’s day.');
+  });
+
+  test('cuts at a normalized semicolon clause boundary', () => {
+    expect(
+      notificationBody(
+        'The warmth of the sun on a cold winter’s day; small, specific, and disproportionately comforting.',
       ),
     ).toBe('The warmth of the sun on a cold winter’s day.');
   });

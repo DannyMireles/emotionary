@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WordFull } from '@/components/WordFull';
 import { findWord, useContentStore } from '@/content/store';
+import { selectionHaptic } from '@/feedback/haptics';
 import { useUserStore } from '@/store/userStore';
 import { color, font, levelPalettes, space, type } from '@/theme/tokens';
 
@@ -33,7 +34,7 @@ export default function WordDetailScreen() {
           <Text style={styles.link}>Check for updates</Text>
         </Pressable>
         <Pressable onPress={() => router.replace('/')} accessibilityRole="button">
-          <Text style={styles.link}>Go to today's word</Text>
+          <Text style={styles.link}>Go to today&apos;s word</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -46,7 +47,14 @@ export default function WordDetailScreen() {
     >
       <View style={styles.backRow}>
         <Pressable
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/browse'))}
+          onPress={() => {
+            selectionHaptic();
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/browse');
+            }
+          }}
           accessibilityRole="button"
           accessibilityLabel="Back"
           hitSlop={10}

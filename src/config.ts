@@ -14,3 +14,5 @@ export const syncEnabled = SUPABASE_URL.length > 0 && SUPABASE_PUBLISHABLE_KEY.l
 /** Book / marketing CTA destination (Daniel: zenfulnote.com for now). */
 export const BOOK_URL = 'https://zenfulnote.com';
 export const BOOK_URL_LABEL = 'zenfulnote.com';
+export const BOOK_COPY = 'This app is a companion to the original collection.';
+export const BOOK_THUMBNAIL_URL = '';

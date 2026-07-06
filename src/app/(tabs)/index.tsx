@@ -27,7 +27,7 @@ export default function TodayScreen() {
   if (!word) {
     return (
       <SafeAreaView style={styles.empty} edges={['top']}>
-        <Text style={styles.emptyText}>No words yet — check back soon.</Text>
+        <Text style={styles.emptyText}>No words yet. Check back soon.</Text>
       </SafeAreaView>
     );
   }

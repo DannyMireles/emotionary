@@ -2,13 +2,17 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import type { Word } from '@/content/types';
+import { selectionHaptic } from '@/feedback/haptics';
 import { color, font, levelPalettes, space, type, typeMeta } from '@/theme/tokens';
 
 /** Browse list card: word + one-line preview, tinted by level (prototype). */
 export function WordCard({ word }: { word: Word }) {
   return (
     <Pressable
-      onPress={() => router.push(`/word/${word.slug}`)}
+      onPress={() => {
+        selectionHaptic();
+        router.push(`/word/${word.slug}`);
+      }}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: levelPalettes[word.level].tint },

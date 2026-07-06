@@ -57,7 +57,7 @@ export async function requestPermission(): Promise<boolean> {
 
 /** First clause of the definition, ≤ ~100 chars, for the notification body. */
 export function notificationBody(definition: string): string {
-  const clause = definition.split(/ — |\. /)[0].trim();
+  const clause = definition.split(/\s+[—–]\s+|;\s+|\. /)[0].trim();
   const body = clause.length > 100 ? `${clause.slice(0, 97)}…` : clause;
   return body.endsWith('.') || body.endsWith('…') ? body : `${body}.`;
 }

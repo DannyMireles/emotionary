@@ -21,6 +21,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { normalizeWordCopy } from '../src/content/normalize';
+
 const ROOT = join(__dirname, '..');
 const BACKDATED_PUBLISHED_AT = '2026-01-01T00:00:00.000Z';
 
@@ -151,18 +153,21 @@ async function main() {
   );
 
   // Upsert by slug via PostgREST: on_conflict=slug + resolution=merge-duplicates.
-  const payload = words.map((w) => ({
-    slug: w.slug,
-    word: w.word,
-    pronunciation: w.pronunciation,
-    language: w.language,
-    type: w.type,
-    level: w.level,
-    definition: w.definition,
-    wisdom: w.wisdom,
-    is_free: w.is_free ?? true,
-    ...(isBootstrap ? { published: true, published_at: BACKDATED_PUBLISHED_AT } : {}),
-  }));
+  const payload = words.map((word) => {
+    const w = normalizeWordCopy(word);
+    return {
+      slug: w.slug,
+      word: w.word,
+      pronunciation: w.pronunciation,
+      language: w.language,
+      type: w.type,
+      level: w.level,
+      definition: w.definition,
+      wisdom: w.wisdom,
+      is_free: w.is_free ?? true,
+      ...(isBootstrap ? { published: true, published_at: BACKDATED_PUBLISHED_AT } : {}),
+    };
+  });
 
   const res = await fetch(`${url}/rest/v1/words?on_conflict=slug`, {
     method: 'POST',

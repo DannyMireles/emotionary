@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL, syncEnabled } from '@/config';
+import { normalizeWordList } from '@/content/normalize';
 import type { ContentSnapshot, ContentStamp, Word } from '@/content/types';
 
 import seedJson from '../../assets/seed/words.json';
@@ -14,7 +15,11 @@ import seedJson from '../../assets/seed/words.json';
  */
 
 const STORAGE_KEY = 'emotionary.content.v1';
-const bundledSeed = seedJson as unknown as ContentSnapshot;
+const rawBundledSeed = seedJson as unknown as ContentSnapshot;
+const bundledSeed: ContentSnapshot = {
+  ...rawBundledSeed,
+  words: normalizeWordList(rawBundledSeed.words),
+};
 
 const WORD_COLUMNS =
   'id,slug,word,pronunciation,language,type,level,definition,wisdom,is_free,published_at,updated_at';
@@ -48,7 +53,7 @@ async function fetchSnapshot(stamp: ContentStamp): Promise<ContentSnapshot | nul
   const url = `${SUPABASE_URL}/rest/v1/words?select=${WORD_COLUMNS}&order=slug.asc`;
   const res = await fetch(url, { headers: restHeaders() });
   if (!res.ok) return null;
-  const words = (await res.json()) as Word[];
+  const words = normalizeWordList((await res.json()) as Word[]);
   // Guard: never replace the store with an empty result — a misconfigured
   // RLS policy must not be able to wipe every device (DESIGN.md §6.3).
   if (!Array.isArray(words) || words.length === 0) return null;
@@ -68,7 +73,7 @@ export const useContentStore = create<ContentState>()((set, get) => ({
       if (raw) {
         const cached = JSON.parse(raw) as ContentSnapshot;
         if (Array.isArray(cached.words) && cached.words.length > 0) {
-          set({ words: cached.words, stamp: cached.stamp });
+          set({ words: normalizeWordList(cached.words), stamp: cached.stamp });
         }
       }
     } catch {

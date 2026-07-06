@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
+import { Image } from 'expo-image';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WordCard } from '@/components/WordCard';
-import { BOOK_URL } from '@/config';
+import { BOOK_COPY, BOOK_THUMBNAIL_URL, BOOK_URL } from '@/config';
 import { findWord, useContentStore } from '@/content/store';
+import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
 
@@ -13,6 +15,22 @@ function StatTile({ value, label }: { value: number; label: string }) {
     <View style={styles.tile} accessibilityLabel={`${value} ${label.toLowerCase()}`}>
       <Text style={styles.tileValue}>{value}</Text>
       <Text style={styles.tileLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function SettingsMark() {
+  return (
+    <View style={styles.settingsMark}>
+      <View style={styles.settingsLine}>
+        <View style={[styles.settingsKnob, { left: 5 }]} />
+      </View>
+      <View style={styles.settingsLine}>
+        <View style={[styles.settingsKnob, { right: 6 }]} />
+      </View>
+      <View style={styles.settingsLine}>
+        <View style={[styles.settingsKnob, { left: 13 }]} />
+      </View>
     </View>
   );
 }
@@ -38,18 +56,21 @@ export default function StatsScreen() {
             Your Stats
           </Text>
           <Pressable
-            onPress={() => router.push('/settings')}
-            style={styles.gear}
+            onPress={() => {
+              selectionHaptic();
+              router.push('/settings');
+            }}
+            style={styles.settingsButton}
             accessibilityRole="button"
             accessibilityLabel="Settings"
             hitSlop={8}
           >
-            <Text style={styles.gearGlyph}>⚙</Text>
+            <SettingsMark />
           </Pressable>
         </View>
 
         {allZero && (
-          <Text style={styles.zeroCopy}>Your streak starts today — read your first word.</Text>
+          <Text style={styles.zeroCopy}>Your streak starts today. Read your first word.</Text>
         )}
 
         <View style={styles.grid}>
@@ -70,18 +91,24 @@ export default function StatsScreen() {
 
         <Pressable
           style={styles.bookCard}
-          onPress={() => Linking.openURL(BOOK_URL)}
+          onPress={() => {
+            lightImpactHaptic();
+            void Linking.openURL(BOOK_URL);
+          }}
           accessibilityRole="link"
           accessibilityLabel="Get the book"
         >
-          <View style={styles.bookCover}>
-            <Text style={styles.bookCoverText}>EMOTIONARY</Text>
-          </View>
+          {BOOK_THUMBNAIL_URL.length > 0 && (
+            <Image
+              source={{ uri: BOOK_THUMBNAIL_URL }}
+              style={styles.bookCover}
+              contentFit="cover"
+              accessibilityIgnoresInvertColors
+            />
+          )}
           <View style={styles.bookInfo}>
             <Text style={styles.bookTitle}>The book</Text>
-            <Text style={styles.bookBlurb}>
-              This app is a companion to the original collection.
-            </Text>
+            {BOOK_COPY.length > 0 && <Text style={styles.bookBlurb}>{BOOK_COPY}</Text>}
             <Text style={styles.bookCta}>GET THE BOOK →</Text>
           </View>
         </Pressable>
@@ -100,8 +127,30 @@ const styles = StyleSheet.create({
     color: color.ink,
     textAlign: 'center',
   },
-  gear: { position: 'absolute', right: 0, top: 4, minWidth: 44, minHeight: 32, alignItems: 'flex-end' },
-  gearGlyph: { fontSize: 20, color: color.inkMuted },
+  settingsButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 44,
+    height: 40,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  settingsMark: { width: 24, gap: 5 },
+  settingsLine: {
+    height: 1,
+    backgroundColor: color.inkMuted,
+  },
+  settingsKnob: {
+    position: 'absolute',
+    top: -3,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: color.inkMuted,
+    backgroundColor: color.paper,
+  },
   zeroCopy: {
     fontFamily: font.serifItalic,
     fontSize: type.small,
@@ -160,18 +209,8 @@ const styles = StyleSheet.create({
   bookCover: {
     width: 64,
     height: 88,
-    borderColor: color.ink,
-    borderWidth: 1,
-    borderRadius: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 4,
-  },
-  bookCoverText: {
-    fontFamily: font.serifMedium,
-    fontSize: 7,
-    letterSpacing: 1.4,
-    color: color.ink,
+    borderRadius: 4,
+    backgroundColor: color.hairline,
   },
   bookInfo: { flex: 1 },
   bookTitle: { fontFamily: font.serifSemiBold, fontSize: type.body, color: color.ink },

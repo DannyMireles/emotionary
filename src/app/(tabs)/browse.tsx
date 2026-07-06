@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { WordCard } from '@/components/WordCard';
 import { useContentStore } from '@/content/store';
 import type { Level, WordType } from '@/content/types';
+import { selectionHaptic } from '@/feedback/haptics';
 import { color, font, letterSpacing, levelPalettes, space, type, typeMeta } from '@/theme/tokens';
 
 const TYPE_FILTERS: { key: WordType | 'all'; label: string; glyph?: string }[] = [
@@ -65,7 +66,10 @@ export default function BrowseScreen() {
           return (
             <Pressable
               key={f.key}
-              onPress={() => setTypeFilter(f.key)}
+              onPress={() => {
+                selectionHaptic();
+                setTypeFilter(f.key);
+              }}
               style={[styles.chip, active && styles.chipActive]}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
@@ -82,7 +86,10 @@ export default function BrowseScreen() {
 
       <View style={styles.levelRow}>
         <Pressable
-          onPress={() => setLevelFilter(0)}
+          onPress={() => {
+            selectionHaptic();
+            setLevelFilter(0);
+          }}
           style={styles.levelAll}
           accessibilityRole="button"
           accessibilityState={{ selected: levelFilter === 0 }}
@@ -97,7 +104,10 @@ export default function BrowseScreen() {
           return (
             <Pressable
               key={lvl}
-              onPress={() => setLevelFilter(active ? 0 : lvl)}
+              onPress={() => {
+                selectionHaptic();
+                setLevelFilter(active ? 0 : lvl);
+              }}
               style={[
                 styles.levelDot,
                 { backgroundColor: levelPalettes[lvl].deep },
@@ -124,6 +134,7 @@ export default function BrowseScreen() {
             {hasActiveFilters && (
               <Pressable
                 onPress={() => {
+                  selectionHaptic();
                   setQuery('');
                   setTypeFilter('all');
                   setLevelFilter(0);

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatTime, TimeControl } from '@/components/TimeControl';
 import { BOOK_URL, BOOK_URL_LABEL } from '@/config';
+import { lightImpactHaptic, selectionHaptic, warningHaptic } from '@/feedback/haptics';
 import { requestPermission } from '@/notifications/scheduler';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
@@ -26,6 +27,7 @@ export default function SettingsScreen() {
   const setNotifEnabled = useUserStore((s) => s.setNotifEnabled);
 
   const onToggle = async (next: boolean) => {
+    selectionHaptic();
     if (!next) {
       setNotifEnabled(false);
       return;
@@ -34,6 +36,7 @@ export default function SettingsScreen() {
     if (granted) {
       setNotifEnabled(true);
     } else if (Platform.OS !== 'web') {
+      warningHaptic();
       Alert.alert(
         'Notifications are off',
         'Enable notifications for Emotionary in system settings to get your daily word.',
@@ -53,7 +56,10 @@ export default function SettingsScreen() {
           Settings
         </Text>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            selectionHaptic();
+            router.back();
+          }}
           style={styles.close}
           accessibilityRole="button"
           accessibilityLabel="Close settings"
@@ -93,10 +99,16 @@ export default function SettingsScreen() {
         <Text style={styles.section}>THE BOOK</Text>
         <View style={styles.cardBlock}>
           <Text style={styles.about}>
-            Emotionary is a companion to the original collection — words for feelings you've felt
+            Emotionary is a companion to the original collection: words for feelings you&apos;ve felt
             but never named.
           </Text>
-          <Pressable onPress={() => Linking.openURL(BOOK_URL)} accessibilityRole="link">
+          <Pressable
+            onPress={() => {
+              lightImpactHaptic();
+              void Linking.openURL(BOOK_URL);
+            }}
+            accessibilityRole="link"
+          >
             <Text style={styles.link}>GET THE BOOK → {BOOK_URL_LABEL.toUpperCase()}</Text>
           </Pressable>
         </View>

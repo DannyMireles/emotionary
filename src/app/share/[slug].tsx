@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { findWord, useContentStore } from '@/content/store';
 import { localDateString } from '@/daily/engine';
+import { lightImpactHaptic, selectionHaptic, successHaptic, warningHaptic } from '@/feedback/haptics';
 import { CARD_BASE_HEIGHT, CARD_BASE_WIDTH, ShareCard } from '@/share/ShareCard';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
@@ -58,6 +59,7 @@ export default function ShareModal() {
     Alert.alert('Not available here', 'Saving and sharing cards works in the mobile app.');
 
   const onDownload = async () => {
+    lightImpactHaptic();
     if (Platform.OS === 'web') return notAvailableOnWeb();
     setBusy('saving');
     try {
@@ -65,6 +67,7 @@ export default function ShareModal() {
       // Write-only save — no READ_MEDIA_* permissions (DESIGN.md §10).
       const perm = await MediaLibrary.requestPermissionsAsync(true, ['photo']);
       if (!perm.granted) {
+        warningHaptic();
         Alert.alert('Permission needed', 'Allow Emotionary to save photos to download word cards.');
         return;
       }
@@ -72,7 +75,9 @@ export default function ShareModal() {
       await MediaLibrary.Asset.create(uri);
       setSaved(true);
       recordShare(word.slug, localDateString());
+      successHaptic();
     } catch {
+      warningHaptic();
       Alert.alert('Something went wrong', 'The card could not be saved. Please try again.');
     } finally {
       setBusy('idle');
@@ -80,6 +85,7 @@ export default function ShareModal() {
   };
 
   const onShare = async () => {
+    lightImpactHaptic();
     if (Platform.OS === 'web') return notAvailableOnWeb();
     setBusy('sharing');
     try {
@@ -87,7 +93,9 @@ export default function ShareModal() {
       const uri = await capture();
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Share this word' });
       recordShare(word.slug, localDateString());
+      successHaptic();
     } catch {
+      warningHaptic();
       Alert.alert('Something went wrong', 'The card could not be shared. Please try again.');
     } finally {
       setBusy('idle');
@@ -100,7 +108,10 @@ export default function ShareModal() {
     <View style={styles.backdrop}>
       <SafeAreaView style={styles.safe}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            selectionHaptic();
+            router.back();
+          }}
           style={styles.close}
           accessibilityRole="button"
           accessibilityLabel="Close"
@@ -163,7 +174,6 @@ const styles = StyleSheet.create({
   shadow: {
     borderRadius: 18,
     overflow: 'hidden',
-    // eslint-disable-next-line react-native/no-inline-styles
     elevation: 8,
   },
   buttons: { flexDirection: 'row', gap: space.m, marginTop: space.l },

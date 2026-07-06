@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatTime, TimeControl } from '@/components/TimeControl';
+import { lightImpactHaptic, selectionHaptic, successHaptic } from '@/feedback/haptics';
 import { requestPermission } from '@/notifications/scheduler';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
@@ -20,6 +21,7 @@ export default function OnboardingScreen() {
   const completeOnboarding = useUserStore((s) => s.completeOnboarding);
 
   const finish = () => {
+    successHaptic();
     completeOnboarding();
     router.replace('/');
   };
@@ -38,12 +40,15 @@ export default function OnboardingScreen() {
             <Text style={styles.glyph}>✳</Text>
             <Text style={styles.wordmark}>EMOTIONARY</Text>
             <Text style={styles.tagline}>
-              Words for feelings you've felt{'\n'}but never named.
+              Words for feelings you&apos;ve felt{'\n'}but never named.
             </Text>
           </View>
           <Pressable
             style={styles.primary}
-            onPress={() => setStep(1)}
+            onPress={() => {
+              selectionHaptic();
+              setStep(1);
+            }}
             accessibilityRole="button"
           >
             <Text style={styles.primaryText}>BEGIN</Text>
@@ -54,7 +59,7 @@ export default function OnboardingScreen() {
           <View style={styles.center}>
             <Text style={styles.stepTitle}>One word, every day.</Text>
             <Text style={styles.stepBody}>
-              A single word arrives each morning — pick your time.
+              A single word arrives each morning. Pick your time.
             </Text>
             <View style={styles.pickerWrap}>
               <TimeControl value={notifTime} onChange={setNotifTime} />
@@ -64,12 +69,19 @@ export default function OnboardingScreen() {
           <View style={styles.actions}>
             <Pressable
               style={styles.primary}
-              onPress={() => void enableAndFinish()}
+              onPress={() => {
+                lightImpactHaptic();
+                void enableAndFinish();
+              }}
               accessibilityRole="button"
             >
               <Text style={styles.primaryText}>ENABLE DAILY WORD</Text>
             </Pressable>
-            <Pressable style={styles.secondary} onPress={finish} accessibilityRole="button">
+            <Pressable
+              style={styles.secondary}
+              onPress={finish}
+              accessibilityRole="button"
+            >
               <Text style={styles.secondaryText}>Maybe later</Text>
             </Pressable>
           </View>

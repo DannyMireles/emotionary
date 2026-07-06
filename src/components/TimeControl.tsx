@@ -2,6 +2,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { selectionHaptic } from '@/feedback/haptics';
 import type { NotifTime } from '@/store/userStore';
 import { color, font, space, type } from '@/theme/tokens';
 
@@ -32,6 +33,7 @@ export function TimeControl({
 
   if (Platform.OS === 'web') {
     const step = (deltaMinutes: number) => {
+      selectionHaptic();
       const total = (value.hour * 60 + value.minute + deltaMinutes + 1440) % 1440;
       onChange({ hour: Math.floor(total / 60), minute: total % 60 });
     };
@@ -52,7 +54,10 @@ export function TimeControl({
     return (
       <View>
         <Pressable
-          onPress={() => setShowAndroidPicker(true)}
+          onPress={() => {
+            selectionHaptic();
+            setShowAndroidPicker(true);
+          }}
           style={styles.androidRow}
           accessibilityRole="button"
           accessibilityLabel={`Delivery time, ${formatTime(value)}`}
@@ -67,6 +72,7 @@ export function TimeControl({
             onChange={(event, date) => {
               setShowAndroidPicker(false);
               if (event.type === 'set' && date) {
+                selectionHaptic();
                 onChange({ hour: date.getHours(), minute: date.getMinutes() });
               }
             }}
@@ -83,7 +89,10 @@ export function TimeControl({
       display="spinner"
       style={styles.iosPicker}
       onChange={(_event, date) => {
-        if (date) onChange({ hour: date.getHours(), minute: date.getMinutes() });
+        if (date) {
+          selectionHaptic();
+          onChange({ hour: date.getHours(), minute: date.getMinutes() });
+        }
       }}
     />
   );

@@ -18,6 +18,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { normalizeWordList } from '../src/content/normalize';
+
 const ROOT = join(__dirname, '..');
 const OUT = join(ROOT, 'assets', 'seed', 'words.json');
 
@@ -59,7 +61,7 @@ async function fromSupabase(url: string, key: string) {
     headers,
   });
   if (!res.ok) throw new Error(`snapshot failed: HTTP ${res.status}`);
-  const words = (await res.json()) as SeedWord[];
+  const words = normalizeWordList((await res.json()) as SeedWord[]);
   return { words, stamp };
 }
 
@@ -70,7 +72,7 @@ function fromLocalMaster() {
       is_free?: boolean;
     })[];
   };
-  const words: SeedWord[] = master.words
+  const words: SeedWord[] = normalizeWordList(master.words)
     .map(({ source: _source, ...w }) => ({
       ...w,
       is_free: w.is_free ?? true,

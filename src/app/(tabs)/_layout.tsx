@@ -1,6 +1,7 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Text, type ColorValue } from 'react-native';
 
+import { selectionHaptic } from '@/feedback/haptics';
 import { useUserStore } from '@/store/userStore';
 import { color, font } from '@/theme/tokens';
 
@@ -14,6 +15,9 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => selectionHaptic(),
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: color.ink,
