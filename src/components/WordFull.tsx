@@ -19,7 +19,11 @@ export function WordFull({ word }: { word: Word }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: palette.tint }]}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.top}>
           <TypeBadge wordType={word.type} />
           <Text
@@ -40,7 +44,9 @@ export function WordFull({ word }: { word: Word }) {
         <View style={styles.bottom}>
           <View style={styles.rule} />
           <Text style={styles.wisdom}>{word.wisdom}</Text>
-          <Text style={styles.fromBook}>from Emotionary, the book</Text>
+          <Text style={styles.fromBook}>
+            from <Text style={styles.fromBookItalic}>Emotionary</Text>, the book
+          </Text>
           <View style={styles.actions}>
             <Pressable
               onPress={() => {
@@ -67,7 +73,7 @@ export function WordFull({ word }: { word: Word }) {
               accessibilityLabel="Share this word as an image card"
               hitSlop={8}
             >
-              <Text style={styles.actionGlyph}>↗</Text>
+              <Text style={styles.actionGlyph}>⤴</Text>
               <Text style={styles.actionLabel}>SHARE</Text>
             </Pressable>
           </View>
@@ -79,14 +85,20 @@ export function WordFull({ word }: { word: Word }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  scroll: { flexGrow: 1, paddingHorizontal: space.l, paddingTop: space.m, paddingBottom: space.l },
-  top: { flexGrow: 1, alignItems: 'center' },
+  scroll: {
+    flexGrow: 1,
+    paddingHorizontal: space.l,
+    paddingTop: space.xl,
+    paddingBottom: 112,
+  },
+  top: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start' },
   word: {
     fontFamily: font.display,
-    fontSize: type.hero,
+    fontSize: 56,
+    lineHeight: 62,
     color: color.ink,
     textAlign: 'center',
-    marginTop: space.l,
+    marginTop: space.m,
   },
   pronunciation: {
     fontFamily: font.serifItalic,
@@ -105,11 +117,13 @@ const styles = StyleSheet.create({
   },
   definition: {
     fontFamily: font.serif,
-    fontSize: type.body,
-    lineHeight: type.body * 1.65,
+    fontSize: 19,
+    lineHeight: 29,
     color: color.ink,
-    marginTop: space.xl,
-    alignSelf: 'stretch',
+    marginTop: space.l,
+    width: '100%',
+    maxWidth: 330,
+    alignSelf: 'center',
   },
   bottom: { alignItems: 'center', marginTop: space.xxl },
   rule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline, alignSelf: 'stretch' },
@@ -128,6 +142,7 @@ const styles = StyleSheet.create({
     color: color.inkFaint,
     marginTop: space.s,
   },
+  fromBookItalic: { fontFamily: font.serifItalic },
   actions: {
     flexDirection: 'row',
     gap: space.xxl,

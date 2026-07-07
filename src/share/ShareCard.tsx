@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { BOOK_URL_LABEL } from '@/config';
 import type { Word } from '@/content/types';
-import { font, letterSpacing, levelPalettes, typeMeta } from '@/theme/tokens';
+import { font, letterSpacing, levelPalettes } from '@/theme/tokens';
 
 /**
  * The share card — DESIGN.md §10. Designed on a 1080×1920 canvas (Instagram /
@@ -16,7 +16,6 @@ export const CARD_BASE_HEIGHT = 1920;
 export function ShareCard({ word, width }: { word: Word; width: number }) {
   const s = width / CARD_BASE_WIDTH;
   const palette = levelPalettes[word.level];
-  const meta = typeMeta[word.type];
 
   return (
     <View
@@ -34,23 +33,10 @@ export function ShareCard({ word, width }: { word: Word; width: number }) {
       <View style={styles.center}>
         <Text
           style={{
-            fontFamily: font.serifMedium,
-            fontSize: 34 * s,
-            letterSpacing: 7 * s,
-            color: palette.onDeep,
-            opacity: 0.82,
-            textAlign: 'center',
-          }}
-        >
-          {meta.glyph}  {meta.label}
-        </Text>
-        <Text
-          style={{
             fontFamily: font.display,
             fontSize: 128 * s,
             color: palette.onDeep,
             textAlign: 'center',
-            marginTop: 56 * s,
           }}
           numberOfLines={2}
           adjustsFontSizeToFit

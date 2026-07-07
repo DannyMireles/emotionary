@@ -1,4 +1,6 @@
 import {
+  Fraunces_300Light,
+  Fraunces_400Regular,
   Fraunces_400Regular_Italic,
   Fraunces_600SemiBold,
 } from '@expo-google-fonts/fraunces';
@@ -26,6 +28,8 @@ configureNotificationHandler();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    Fraunces_300Light,
+    Fraunces_400Regular,
     Fraunces_600SemiBold,
     Fraunces_400Regular_Italic,
     Literata_400Regular,

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WordCard } from '@/components/WordCard';
@@ -29,6 +29,7 @@ export default function BrowseScreen() {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<WordType | 'all'>('all');
   const [levelFilter, setLevelFilter] = useState<Level | 0>(0);
+  const [keyOpen, setKeyOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
@@ -45,9 +46,23 @@ export default function BrowseScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <Text style={styles.title} accessibilityRole="header">
-        Browse
-      </Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title} accessibilityRole="header">
+          Browse
+        </Text>
+        <Pressable
+          onPress={() => {
+            selectionHaptic();
+            setKeyOpen(true);
+          }}
+          style={styles.keyButton}
+          accessibilityRole="button"
+          accessibilityLabel="How categorization works"
+          hitSlop={8}
+        >
+          <Text style={styles.keyButtonText}>?</Text>
+        </Pressable>
+      </View>
 
       <TextInput
         style={styles.search}
@@ -78,10 +93,8 @@ export default function BrowseScreen() {
               accessibilityState={{ selected: active }}
               accessibilityLabel={`Filter: ${f.label}`}
             >
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                {f.glyph ? `${f.glyph} ` : ''}
-                {f.label}
-              </Text>
+              {f.glyph && <Text style={styles.chipGlyph}>{f.glyph}</Text>}
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{f.label}</Text>
             </Pressable>
           );
         })}
@@ -155,18 +168,138 @@ export default function BrowseScreen() {
           </View>
         }
       />
+
+      <BrowseKeyModal visible={keyOpen} onClose={() => setKeyOpen(false)} />
     </SafeAreaView>
+  );
+}
+
+function BrowseKeyModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  return (
+    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCard}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Key</Text>
+            <Pressable
+              onPress={() => {
+                selectionHaptic();
+                onClose();
+              }}
+              style={styles.modalClose}
+              accessibilityRole="button"
+              accessibilityLabel="Close key"
+            >
+              <Text style={styles.modalCloseText}>×</Text>
+            </Pressable>
+          </View>
+
+          <ScrollView contentContainerStyle={styles.modalScroll} showsVerticalScrollIndicator={false}>
+            <Text style={styles.modalSection}>LEVELS</Text>
+            <KeyLevel level={1} name="FLEETING" body="Light, fleeting, surface sensations" />
+            <KeyLevel
+              level={2}
+              name="UNDERCURRENTS"
+              body="Present but subtle, humming beneath the surface"
+            />
+            <KeyLevel
+              level={3}
+              name="IN-BETWEEN"
+              body="Complex, mixed, pulling in two directions at once"
+            />
+            <KeyLevel
+              level={4}
+              name="THE WEIGHT"
+              body="Heavy, slow, demanding your full attention"
+            />
+            <KeyLevel
+              level={5}
+              name="THE DEPTHS"
+              body="The most intense, transformative human experiences"
+            />
+
+            <Text style={styles.modalSection}>ICON KEY</Text>
+            <IconKey
+              icon="🌍"
+              title="WANDERWORD"
+              body="A word from another language or culture that has no direct English equivalent. You'll see a world icon next to a word that has cultural origins."
+            />
+            <IconKey
+              icon="🔍"
+              title="HIDDEN ENGLISH"
+              body="A real English word that exists in the dictionary but rarely makes it into everyday conversation. These have been here all along, but most people were just never introduced to them."
+            />
+            <IconKey
+              icon="🧠"
+              title="CLINICAL"
+              body="A term with roots in psychology simplified here for everyday use. These words belong to everyone, not just those who've sat across from a therapist."
+            />
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function KeyLevel({ level, name, body }: { level: Level; name: string; body: string }) {
+  return (
+    <View style={styles.keyLine}>
+      <View style={[styles.keyDot, { backgroundColor: levelPalettes[level].deep }]}>
+        <Text style={styles.keyDotText}>{level}</Text>
+      </View>
+      <View style={styles.keyCopy}>
+        <Text style={styles.keyTitle}>LEVEL {level} = {name}</Text>
+        <Text style={styles.keyBody}>{body}</Text>
+      </View>
+    </View>
+  );
+}
+
+function IconKey({ icon, title, body }: { icon: string; title: string; body: string }) {
+  return (
+    <View style={styles.keyLine}>
+      <View style={styles.iconKeyWrap}>
+        <Text style={styles.iconKeyText}>{icon}</Text>
+      </View>
+      <View style={styles.keyCopy}>
+        <Text style={styles.keyTitle}>{title}</Text>
+        <Text style={styles.keyBody}>{body}</Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
+  headerRow: {
+    marginTop: space.s,
+    paddingHorizontal: space.l,
+    minHeight: 42,
+    justifyContent: 'center',
+  },
   title: {
     fontFamily: font.display,
     fontSize: type.title,
     color: color.ink,
     textAlign: 'center',
-    marginTop: space.s,
+  },
+  keyButton: {
+    position: 'absolute',
+    right: space.l,
+    top: 1,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    backgroundColor: color.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  keyButtonText: {
+    fontFamily: font.serifSemiBold,
+    fontSize: type.body,
+    color: color.ink,
   },
   search: {
     fontFamily: font.serif,
@@ -190,14 +323,18 @@ const styles = StyleSheet.create({
     marginTop: space.m,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     borderColor: color.hairline,
     borderWidth: 1,
     borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
     backgroundColor: color.card,
   },
   chipActive: { backgroundColor: color.ink, borderColor: color.ink },
+  chipGlyph: { fontSize: 15, lineHeight: 16 },
   chipText: {
     fontFamily: font.serifMedium,
     fontSize: type.badge,
@@ -235,5 +372,82 @@ const styles = StyleSheet.create({
     fontSize: type.small,
     color: color.ink,
     textDecorationLine: 'underline',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: color.overlay,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: space.l,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    maxHeight: '82%',
+    borderRadius: 18,
+    backgroundColor: color.paper,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    minHeight: 54,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: color.hairline,
+  },
+  modalTitle: { fontFamily: font.display, fontSize: type.title - 2, color: color.ink },
+  modalClose: {
+    position: 'absolute',
+    right: space.m,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseText: { fontSize: 20, color: color.inkMuted },
+  modalScroll: { padding: space.l, gap: space.m, paddingBottom: space.xl },
+  modalSection: {
+    fontFamily: font.serifMedium,
+    fontSize: type.badge,
+    letterSpacing: letterSpacing.caps,
+    color: color.inkFaint,
+    marginTop: space.xs,
+  },
+  keyLine: { flexDirection: 'row', gap: space.m, alignItems: 'flex-start' },
+  keyDot: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  keyDotText: { fontFamily: font.serifSemiBold, fontSize: type.caption, color: color.paper },
+  iconKeyWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    backgroundColor: color.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconKeyText: { fontSize: 16 },
+  keyCopy: { flex: 1 },
+  keyTitle: {
+    fontFamily: font.serifSemiBold,
+    fontSize: type.small,
+    color: color.ink,
+  },
+  keyBody: {
+    fontFamily: font.serif,
+    fontSize: type.caption,
+    lineHeight: type.caption * 1.45,
+    color: color.inkMuted,
+    marginTop: 2,
   },
 });

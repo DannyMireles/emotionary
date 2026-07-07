@@ -19,6 +19,13 @@ import { CARD_BASE_HEIGHT, CARD_BASE_WIDTH, ShareCard } from '@/share/ShareCard'
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
 
+const SHARE_TARGETS = [
+  { key: 'instagram', label: 'Instagram', icon: 'ig' },
+  { key: 'imessage', label: 'iMessage', icon: '✉' },
+  { key: 'facebook', label: 'Facebook', icon: 'f' },
+  { key: 'whatsapp', label: 'WhatsApp', icon: 'wa' },
+] as const;
+
 export default function ShareModal() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const words = useContentStore((s) => s.words);
@@ -37,7 +44,7 @@ export default function ShareModal() {
   }
 
   // Fit the 9:16 preview inside the window with room for the buttons.
-  const cardWidth = Math.min(winW * 0.72, (winH * 0.62 * CARD_BASE_WIDTH) / CARD_BASE_HEIGHT);
+  const cardWidth = Math.min(winW * 0.72, (winH * 0.54 * CARD_BASE_WIDTH) / CARD_BASE_HEIGHT);
 
   // Native-only modules are imported lazily inside the handlers — a static
   // import of expo-media-library breaks web/server rendering (its classes
@@ -149,6 +156,23 @@ export default function ShareModal() {
             <Text style={styles.buttonSolidText}>{busy === 'sharing' ? 'SHARING…' : 'SHARE'}</Text>
           </Pressable>
         </View>
+        <View style={styles.targetRow}>
+          {SHARE_TARGETS.map((target) => (
+            <Pressable
+              key={target.key}
+              onPress={onShare}
+              disabled={!ready}
+              style={[styles.targetButton, !ready && styles.disabled]}
+              accessibilityRole="button"
+              accessibilityLabel={`Share to ${target.label}`}
+            >
+              <View style={styles.targetIcon}>
+                <Text style={styles.targetIconText}>{target.icon}</Text>
+              </View>
+              <Text style={styles.targetLabel}>{target.label}</Text>
+            </Pressable>
+          ))}
+        </View>
         <Text style={styles.caption}>Sized for Instagram / Facebook Stories</Text>
       </SafeAreaView>
     </View>
@@ -199,6 +223,37 @@ const styles = StyleSheet.create({
     color: color.ink,
   },
   disabled: { opacity: 0.5 },
+  targetRow: {
+    flexDirection: 'row',
+    gap: space.m,
+    marginTop: space.m,
+    maxWidth: 330,
+  },
+  targetButton: {
+    alignItems: 'center',
+    gap: 5,
+    width: 66,
+  },
+  targetIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  targetIconText: {
+    fontFamily: font.serifSemiBold,
+    fontSize: type.small,
+    color: color.ink,
+    textTransform: 'uppercase',
+  },
+  targetLabel: {
+    fontFamily: font.serif,
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.78)',
+    textAlign: 'center',
+  },
   caption: {
     fontFamily: font.serif,
     fontSize: type.caption,

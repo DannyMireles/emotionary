@@ -1,7 +1,8 @@
 import { Redirect, Tabs } from 'expo-router';
-import { Text, type ColorValue } from 'react-native';
+import { DeviceEventEmitter, Text, type ColorValue } from 'react-native';
 
 import { selectionHaptic } from '@/feedback/haptics';
+import { STATS_SHAKE_EVENT } from '@/stats/events';
 import { useUserStore } from '@/store/userStore';
 import { color, font } from '@/theme/tokens';
 
@@ -15,9 +16,14 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      screenListeners={{
-        tabPress: () => selectionHaptic(),
-      }}
+      screenListeners={({ route }) => ({
+        tabPress: () => {
+          selectionHaptic();
+          if (route.name === 'stats') {
+            DeviceEventEmitter.emit(STATS_SHAKE_EVENT);
+          }
+        },
+      })}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: color.ink,

@@ -1,14 +1,29 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Image } from 'expo-image';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import {
+  Animated,
+  DeviceEventEmitter,
+  Easing,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Vibration,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AmbientInk } from '@/components/AmbientInk';
 import { WordCard } from '@/components/WordCard';
 import { BOOK_COPY, BOOK_THUMBNAIL_URL, BOOK_URL } from '@/config';
 import { findWord, useContentStore } from '@/content/store';
 import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
+import { STATS_SHAKE_EVENT } from '@/stats/events';
 import { useUserStore } from '@/store/userStore';
-import { color, font, letterSpacing, space, type } from '@/theme/tokens';
+import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/tokens';
 
 function StatTile({ value, label }: { value: number; label: string }) {
   return (
@@ -35,6 +50,60 @@ function SettingsMark() {
   );
 }
 
+function WidgetShowcase() {
+  return (
+    <View style={styles.widgetWrap}>
+      <Text style={styles.section}>WIDGETS</Text>
+      <View style={styles.widgetCards}>
+        <View style={styles.widgetCard}>
+          <View style={styles.homeWidgetPreview}>
+            <Text style={styles.widgetWord}>Apricity</Text>
+            <Text style={styles.widgetDefinition} numberOfLines={4}>
+              The warmth of the sun on a cold winter's day.
+            </Text>
+          </View>
+          <Text style={styles.widgetTitle}>Home Screen</Text>
+          <Text style={styles.widgetLink}>CONFIGURE</Text>
+        </View>
+        <View style={styles.widgetCard}>
+          <View style={styles.lockWidgetPreview}>
+            <Text style={styles.lockTime}>11:19</Text>
+            <Text style={styles.lockWidgetWord}>Apricity</Text>
+            <Text style={styles.lockWidgetPronunciation}>[uh-PRIS-ih-tee]</Text>
+          </View>
+          <Text style={styles.widgetTitle}>Lock Screen</Text>
+          <Text style={styles.widgetLink}>LEARN HOW</Text>
+        </View>
+      </View>
+      <View style={styles.widgetSettings}>
+        <Text style={styles.widgetSettingsTitle}>Widget Settings</Text>
+        <SettingsRow label="Topics" value="Mix" />
+        <SettingsRow label="Theme" value="Auto" />
+        <SettingsRow label="Widget Border" value="On" />
+        <SettingsRow label="Refresh" value="Hourly" />
+      </View>
+    </View>
+  );
+}
+
+function SettingsRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.widgetSettingsRow}>
+      <Text style={styles.widgetSettingsLabel}>{label}</Text>
+      <Text style={styles.widgetSettingsValue}>{value}</Text>
+    </View>
+  );
+}
+
+function BookCoverPlaceholder() {
+  return (
+    <View style={styles.bookCoverPlaceholder}>
+      <Text style={styles.bookCoverTitle}>Emotionary</Text>
+      <Text style={styles.bookCoverAuthor}>THE BOOK</Text>
+    </View>
+  );
+}
+
 export default function StatsScreen() {
   const words = useContentStore((s) => s.words);
   const streak = useUserStore((s) => s.streakState.streak);
@@ -47,79 +116,129 @@ export default function StatsScreen() {
     .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   const allZero = streak === 0 && readCount === 0 && favorites.length === 0 && sharedCount === 0;
+  const shakeX = useRef(new Animated.Value(0)).current;
+
+  const triggerShake = useCallback(() => {
+    Vibration.vibrate(28);
+    shakeX.stopAnimation();
+    shakeX.setValue(0);
+    Animated.sequence([
+      Animated.timing(shakeX, {
+        toValue: -5,
+        duration: 42,
+        easing: Easing.linear,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.timing(shakeX, {
+        toValue: 5,
+        duration: 42,
+        easing: Easing.linear,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.timing(shakeX, {
+        toValue: -3,
+        duration: 38,
+        easing: Easing.linear,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.timing(shakeX, {
+        toValue: 0,
+        duration: 48,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+    ]).start();
+  }, [shakeX]);
+
+  useFocusEffect(
+    useCallback(() => {
+      triggerShake();
+    }, [triggerShake]),
+  );
+
+  useEffect(() => {
+    const sub = DeviceEventEmitter.addListener(STATS_SHAKE_EVENT, triggerShake);
+    return () => sub.remove();
+  }, [triggerShake]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <Text style={styles.title} accessibilityRole="header">
-            Your Stats
-          </Text>
-          <Pressable
-            onPress={() => {
-              selectionHaptic();
-              router.push('/settings');
-            }}
-            style={styles.settingsButton}
-            accessibilityRole="button"
-            accessibilityLabel="Settings"
-            hitSlop={8}
-          >
-            <SettingsMark />
-          </Pressable>
-        </View>
-
-        {allZero && (
-          <Text style={styles.zeroCopy}>Your streak starts today. Read your first word.</Text>
-        )}
-
-        <View style={styles.grid}>
-          <StatTile value={streak} label="DAY STREAK" />
-          <StatTile value={readCount} label="WORDS READ" />
-          <StatTile value={favorites.length} label="FAVORITED" />
-          <StatTile value={sharedCount} label="SHARED" />
-        </View>
-
-        <Text style={styles.section}>FAVORITED WORDS</Text>
-        {favoriteWords.length === 0 ? (
-          <Text style={styles.emptyFavorites}>
-            Tap ♡ SAVE on any word to keep it here.
-          </Text>
-        ) : (
-          favoriteWords.map((w) => <WordCard key={w.slug} word={w} />)
-        )}
-
-        <Pressable
-          style={styles.bookCard}
-          onPress={() => {
-            lightImpactHaptic();
-            void Linking.openURL(BOOK_URL);
-          }}
-          accessibilityRole="link"
-          accessibilityLabel="Get the book"
-        >
-          {BOOK_THUMBNAIL_URL.length > 0 && (
-            <Image
-              source={{ uri: BOOK_THUMBNAIL_URL }}
-              style={styles.bookCover}
-              contentFit="cover"
-              accessibilityIgnoresInvertColors
-            />
-          )}
-          <View style={styles.bookInfo}>
-            <Text style={styles.bookTitle}>The book</Text>
-            {BOOK_COPY.length > 0 && <Text style={styles.bookBlurb}>{BOOK_COPY}</Text>}
-            <Text style={styles.bookCta}>GET THE BOOK →</Text>
+      <AmbientInk specks />
+      <Animated.View style={[styles.shakeWrap, { transform: [{ translateX: shakeX }] }]}>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title} accessibilityRole="header">
+              Your Stats
+            </Text>
+            <Pressable
+              onPress={() => {
+                selectionHaptic();
+                router.push('/settings');
+              }}
+              style={styles.settingsButton}
+              accessibilityRole="button"
+              accessibilityLabel="Settings"
+              hitSlop={8}
+            >
+              <SettingsMark />
+            </Pressable>
           </View>
-        </Pressable>
-      </ScrollView>
+
+          {allZero && (
+            <Text style={styles.zeroCopy}>Your streak starts today. Read your first word.</Text>
+          )}
+
+          <View style={styles.grid}>
+            <StatTile value={streak} label="DAY STREAK" />
+            <StatTile value={readCount} label="WORDS READ" />
+            <StatTile value={favorites.length} label="FAVORITED" />
+            <StatTile value={sharedCount} label="SHARED" />
+          </View>
+
+          <Text style={styles.section}>FAVORITED WORDS</Text>
+          {favoriteWords.length === 0 ? (
+            <Text style={styles.emptyFavorites}>Tap ♡ SAVE on any word to keep it here.</Text>
+          ) : (
+            favoriteWords.map((w) => <WordCard key={w.slug} word={w} />)
+          )}
+
+          <WidgetShowcase />
+
+          <Pressable
+            style={styles.bookCard}
+            onPress={() => {
+              lightImpactHaptic();
+              void Linking.openURL(BOOK_URL);
+            }}
+            accessibilityRole="link"
+            accessibilityLabel="Get the book"
+          >
+            {BOOK_THUMBNAIL_URL.length > 0 ? (
+              <Image
+                source={{ uri: BOOK_THUMBNAIL_URL }}
+                style={styles.bookCover}
+                contentFit="cover"
+                accessibilityIgnoresInvertColors
+              />
+            ) : (
+              <BookCoverPlaceholder />
+            )}
+            <View style={styles.bookInfo}>
+              <Text style={styles.bookTitle}>The book</Text>
+              {BOOK_COPY.length > 0 && <Text style={styles.bookBlurb}>{BOOK_COPY}</Text>}
+              <Text style={styles.bookCta}>GET THE BOOK →</Text>
+            </View>
+          </Pressable>
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
-  scroll: { paddingHorizontal: space.l, paddingBottom: space.xl },
+  shakeWrap: { flex: 1 },
+  scroll: { paddingHorizontal: space.l, paddingBottom: 112 },
   headerRow: { marginTop: space.s },
   title: {
     fontFamily: font.display,
@@ -195,6 +314,102 @@ const styles = StyleSheet.create({
     fontSize: type.small,
     color: color.inkFaint,
   },
+  widgetWrap: { marginTop: space.xl },
+  widgetCards: {
+    flexDirection: 'row',
+    gap: space.s + 2,
+  },
+  widgetCard: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    backgroundColor: 'rgba(255,255,255,0.68)',
+    padding: space.m,
+    alignItems: 'center',
+  },
+  homeWidgetPreview: {
+    width: 82,
+    height: 82,
+    borderRadius: 16,
+    backgroundColor: levelPalettes[1].deep,
+    padding: space.s,
+    justifyContent: 'center',
+  },
+  widgetWord: {
+    fontFamily: font.display,
+    fontSize: type.small,
+    color: levelPalettes[1].onDeep,
+    textAlign: 'center',
+  },
+  widgetDefinition: {
+    fontFamily: font.serif,
+    fontSize: 8,
+    lineHeight: 10,
+    color: levelPalettes[1].onDeep,
+    textAlign: 'center',
+    marginTop: 3,
+  },
+  lockWidgetPreview: {
+    width: 82,
+    height: 82,
+    borderRadius: 18,
+    backgroundColor: color.ink,
+    padding: space.s,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockTime: { fontFamily: font.display, fontSize: type.body, color: color.paper },
+  lockWidgetWord: {
+    fontFamily: font.serifSemiBold,
+    fontSize: type.caption,
+    color: color.paper,
+    marginTop: 2,
+  },
+  lockWidgetPronunciation: {
+    fontFamily: font.serif,
+    fontSize: 7,
+    color: 'rgba(255,255,255,0.68)',
+  },
+  widgetTitle: {
+    fontFamily: font.serifSemiBold,
+    fontSize: type.caption,
+    color: color.ink,
+    marginTop: space.s,
+  },
+  widgetLink: {
+    fontFamily: font.serifMedium,
+    fontSize: 8,
+    letterSpacing: 0.6,
+    color: color.inkMuted,
+    textDecorationLine: 'underline',
+    marginTop: 2,
+  },
+  widgetSettings: {
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    backgroundColor: color.card,
+    paddingHorizontal: space.m,
+    paddingTop: space.m,
+    marginTop: space.s + 2,
+  },
+  widgetSettingsTitle: {
+    fontFamily: font.display,
+    fontSize: type.body,
+    color: color.ink,
+    textAlign: 'center',
+    marginBottom: space.s,
+  },
+  widgetSettingsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: color.hairline,
+    paddingVertical: space.s,
+  },
+  widgetSettingsLabel: { fontFamily: font.serif, fontSize: type.small, color: color.ink },
+  widgetSettingsValue: { fontFamily: font.serif, fontSize: type.small, color: color.inkMuted },
   bookCard: {
     flexDirection: 'row',
     gap: space.m,
@@ -211,6 +426,30 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 4,
     backgroundColor: color.hairline,
+  },
+  bookCoverPlaceholder: {
+    width: 64,
+    height: 88,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: color.ink,
+    backgroundColor: color.card,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: space.s,
+  },
+  bookCoverTitle: {
+    fontFamily: font.display,
+    fontSize: type.caption,
+    color: color.ink,
+    marginTop: space.s,
+  },
+  bookCoverAuthor: {
+    fontFamily: font.serifMedium,
+    fontSize: 7,
+    letterSpacing: 0.6,
+    color: color.inkMuted,
+    marginBottom: space.s,
   },
   bookInfo: { flex: 1 },
   bookTitle: { fontFamily: font.serifSemiBold, fontSize: type.body, color: color.ink },

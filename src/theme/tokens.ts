@@ -36,14 +36,16 @@ export const levelPalettes: Record<Level, LevelPalette> = {
 };
 
 export const typeMeta: Record<WordType, { label: string; glyph: string }> = {
-  wanderword: { label: 'WANDERWORD', glyph: '⊕' },
-  hidden_english: { label: 'HIDDEN ENGLISH', glyph: '⌕' },
-  psychology: { label: 'PSYCHOLOGY', glyph: '✦' },
+  wanderword: { label: 'WANDERWORD', glyph: '🌍' },
+  hidden_english: { label: 'HIDDEN ENGLISH', glyph: '🔍' },
+  psychology: { label: 'CLINICAL', glyph: '🧠' },
 };
 
 export const font = {
   /** the word hero + wordmark */
-  display: 'Fraunces_600SemiBold',
+  display: 'Fraunces_400Regular',
+  displayLight: 'Fraunces_300Light',
+  displaySemiBold: 'Fraunces_600SemiBold',
   displayItalic: 'Fraunces_400Regular_Italic',
   /** body / definitions */
   serif: 'Literata_400Regular',
