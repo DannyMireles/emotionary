@@ -12,7 +12,7 @@ import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/
  * type badge → display-serif word → [pronunciation] → origin → definition,
  * with the wisdom line + SAVE/SHARE anchored at the bottom.
  */
-export function WordFull({ word }: { word: Word }) {
+export function WordFull({ word, feedPage = false }: { word: Word; feedPage?: boolean }) {
   const isFavorite = useUserStore((s) => s.favorites.includes(word.slug));
   const toggleFavorite = useUserStore((s) => s.toggleFavorite);
   const palette = levelPalettes[word.level];
@@ -21,8 +21,10 @@ export function WordFull({ word }: { word: Word }) {
     <View style={[styles.screen, { backgroundColor: palette.tint }]}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, feedPage && styles.feedScroll]}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={!feedPage}
+        bounces={!feedPage}
       >
         <View style={styles.top}>
           <TypeBadge wordType={word.type} />
@@ -41,7 +43,7 @@ export function WordFull({ word }: { word: Word }) {
           <Text style={styles.definition}>{word.definition}</Text>
         </View>
 
-        <View style={styles.bottom}>
+        <View style={[styles.bottom, feedPage && styles.feedBottom]}>
           <View style={styles.rule} />
           <Text style={styles.wisdom}>{word.wisdom}</Text>
           <Text style={styles.fromBook}>
@@ -91,6 +93,10 @@ const styles = StyleSheet.create({
     paddingTop: space.xl,
     paddingBottom: 112,
   },
+  feedScroll: {
+    paddingTop: space.l,
+    paddingBottom: space.l,
+  },
   top: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start' },
   word: {
     fontFamily: font.display,
@@ -126,6 +132,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   bottom: { alignItems: 'center', marginTop: space.xxl },
+  feedBottom: { marginTop: space.xl },
   rule: { height: StyleSheet.hairlineWidth, backgroundColor: color.hairline, alignSelf: 'stretch' },
   wisdom: {
     fontFamily: font.serifItalic,

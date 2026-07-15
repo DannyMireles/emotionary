@@ -1,5 +1,15 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, Platform, StyleSheet, View, type ViewStyle } from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
 
 import { color, levelPalettes } from '@/theme/tokens';
 
@@ -30,78 +40,106 @@ export function AmbientInk({
   specks?: boolean;
   style?: ViewStyle;
 }) {
-  const drift = useRef(new Animated.Value(0)).current;
+  const drift = useSharedValue(0);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(drift, {
-          toValue: 1,
-          duration: 5400,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(drift, {
-          toValue: 0,
-          duration: 5400,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ]),
+    cancelAnimation(drift);
+    if (reducedMotion) {
+      drift.value = 0;
+      return;
+    }
+    drift.value = withRepeat(
+      withTiming(1, { duration: 5400, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true,
     );
-    loop.start();
-    return () => loop.stop();
-  }, [drift]);
-
-  const translateY = drift.interpolate({ inputRange: [0, 1], outputRange: [0, -10] });
-  const translateX = drift.interpolate({ inputRange: [0, 1], outputRange: [0, 8] });
-  const scale = drift.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
-  const speckOpacity = drift.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.22, 0.5, 0.22] });
+    return () => cancelAnimation(drift);
+  }, [drift, reducedMotion]);
 
   return (
     <View style={[StyleSheet.absoluteFill, styles.wrap, style]}>
       {blotSpecs.map((blot, index) => (
-        <Animated.View
-          key={`${blot.color}-${index}`}
-          style={[
-            styles.blot,
-            {
-              width: blot.size,
-              height: blot.size,
-              borderRadius: blot.size / 2,
-              backgroundColor: blot.color,
-              opacity: blot.opacity,
-              transform: [
-                { translateX: index % 2 === 0 ? translateX : Animated.multiply(translateX, -1) },
-                { translateY: index % 2 === 0 ? translateY : Animated.multiply(translateY, -1) },
-                { scale },
-              ],
-              ...positionStyle(blot),
-            },
-          ]}
+        <DriftingBlot
+          key={blot.color + '-' + index}
+          blot={blot}
+          index={index}
+          drift={drift}
         />
       ))}
       {specks &&
         speckSpecs.map((speck, index) => (
-          <Animated.View
-            key={`speck-${index}`}
-            style={[
-              styles.speck,
-              {
-                width: speck.size,
-                height: speck.size,
-                borderRadius: speck.size / 2,
-                backgroundColor: speck.color,
-                opacity: speckOpacity,
-                transform: [
-                  { translateY: index % 2 === 0 ? translateY : Animated.multiply(translateY, -1) },
-                ],
-                ...positionStyle(speck),
-              },
-            ]}
-          />
+          <DriftingSpeck key={'speck-' + index} speck={speck} index={index} drift={drift} />
         ))}
     </View>
+  );
+}
+
+function DriftingBlot({
+  blot,
+  index,
+  drift,
+}: {
+  blot: (typeof blotSpecs)[number];
+  index: number;
+  drift: SharedValue<number>;
+}) {
+  const direction = index % 2 === 0 ? 1 : -1;
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: direction * 8 * drift.value },
+      { translateY: direction * -10 * drift.value },
+      { scale: 1 + 0.08 * drift.value },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        styles.blot,
+        {
+          width: blot.size,
+          height: blot.size,
+          borderRadius: blot.size / 2,
+          backgroundColor: blot.color,
+          opacity: blot.opacity,
+          ...positionStyle(blot),
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+}
+
+function DriftingSpeck({
+  speck,
+  index,
+  drift,
+}: {
+  speck: (typeof speckSpecs)[number];
+  index: number;
+  drift: SharedValue<number>;
+}) {
+  const direction = index % 2 === 0 ? 1 : -1;
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: 0.22 + 0.28 * (1 - Math.abs(drift.value * 2 - 1)),
+    transform: [{ translateY: direction * -10 * drift.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        styles.speck,
+        {
+          width: speck.size,
+          height: speck.size,
+          borderRadius: speck.size / 2,
+          backgroundColor: speck.color,
+          ...positionStyle(speck),
+        },
+        animatedStyle,
+      ]}
+    />
   );
 }
 
