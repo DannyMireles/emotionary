@@ -1,27 +1,24 @@
 import { router, useFocusEffect } from 'expo-router';
 import { Image } from 'expo-image';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Animated,
   DeviceEventEmitter,
-  Easing,
   Linking,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  Vibration,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AmbientInk } from '@/components/AmbientInk';
+import { StatsBurst } from '@/components/stats-burst';
 import { WordCard } from '@/components/WordCard';
 import { BOOK_COPY, BOOK_THUMBNAIL_URL, BOOK_URL } from '@/config';
 import { findWord, useContentStore } from '@/content/store';
 import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
-import { STATS_SHAKE_EVENT } from '@/stats/events';
+import { STATS_OPEN_EVENT } from '@/stats/events';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/tokens';
 
@@ -59,7 +56,7 @@ function WidgetShowcase() {
           <View style={styles.homeWidgetPreview}>
             <Text style={styles.widgetWord}>Apricity</Text>
             <Text style={styles.widgetDefinition} numberOfLines={4}>
-              The warmth of the sun on a cold winter's day.
+              The warmth of the sun on a cold winter&apos;s day.
             </Text>
           </View>
           <Text style={styles.widgetTitle}>Home Screen</Text>
@@ -110,63 +107,45 @@ export default function StatsScreen() {
   const readCount = useUserStore((s) => s.readSlugs.length);
   const favorites = useUserStore((s) => s.favorites);
   const sharedCount = useUserStore((s) => s.sharedCount);
+  const scrollRef = useRef<ScrollView>(null);
+  const lastOpenAt = useRef(0);
+  const [burstKey, setBurstKey] = useState(0);
 
   const favoriteWords = favorites
     .map((slug) => findWord(words, slug))
     .filter((w): w is NonNullable<typeof w> => Boolean(w));
 
   const allZero = streak === 0 && readCount === 0 && favorites.length === 0 && sharedCount === 0;
-  const shakeX = useRef(new Animated.Value(0)).current;
-
-  const triggerShake = useCallback(() => {
-    Vibration.vibrate(28);
-    shakeX.stopAnimation();
-    shakeX.setValue(0);
-    Animated.sequence([
-      Animated.timing(shakeX, {
-        toValue: -5,
-        duration: 42,
-        easing: Easing.linear,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(shakeX, {
-        toValue: 5,
-        duration: 42,
-        easing: Easing.linear,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(shakeX, {
-        toValue: -3,
-        duration: 38,
-        easing: Easing.linear,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(shakeX, {
-        toValue: 0,
-        duration: 48,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-    ]).start();
-  }, [shakeX]);
+  const openStats = useCallback(() => {
+    const now = Date.now();
+    if (now - lastOpenAt.current < 120) return;
+    lastOpenAt.current = now;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    setBurstKey((current) => current + 1);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      triggerShake();
-    }, [triggerShake]),
+      openStats();
+    }, [openStats]),
   );
 
   useEffect(() => {
-    const sub = DeviceEventEmitter.addListener(STATS_SHAKE_EVENT, triggerShake);
+    const sub = DeviceEventEmitter.addListener(STATS_OPEN_EVENT, openStats);
     return () => sub.remove();
-  }, [triggerShake]);
+  }, [openStats]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <AmbientInk specks />
-      <Animated.View style={[styles.shakeWrap, { transform: [{ translateX: shakeX }] }]}>
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.headerRow}>
+      <AmbientInk />
+      <StatsBurst burstKey={burstKey} />
+      <ScrollView
+        ref={scrollRef}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerRow}>
             <Text style={styles.title} accessibilityRole="header">
               Your Stats
             </Text>
@@ -182,29 +161,29 @@ export default function StatsScreen() {
             >
               <SettingsMark />
             </Pressable>
-          </View>
+        </View>
 
-          {allZero && (
-            <Text style={styles.zeroCopy}>Your streak starts today. Read your first word.</Text>
-          )}
+        {allZero && (
+          <Text style={styles.zeroCopy}>Your streak starts today. Read your first word.</Text>
+        )}
 
-          <View style={styles.grid}>
-            <StatTile value={streak} label="DAY STREAK" />
-            <StatTile value={readCount} label="WORDS READ" />
-            <StatTile value={favorites.length} label="FAVORITED" />
-            <StatTile value={sharedCount} label="SHARED" />
-          </View>
+        <View style={styles.grid}>
+          <StatTile value={streak} label="DAY STREAK" />
+          <StatTile value={readCount} label="WORDS READ" />
+          <StatTile value={favorites.length} label="FAVORITED" />
+          <StatTile value={sharedCount} label="SHARED" />
+        </View>
 
-          <Text style={styles.section}>FAVORITED WORDS</Text>
-          {favoriteWords.length === 0 ? (
-            <Text style={styles.emptyFavorites}>Tap ♡ SAVE on any word to keep it here.</Text>
-          ) : (
-            favoriteWords.map((w) => <WordCard key={w.slug} word={w} />)
-          )}
+        <Text style={styles.section}>FAVORITED WORDS</Text>
+        {favoriteWords.length === 0 ? (
+          <Text style={styles.emptyFavorites}>Tap ♡ SAVE on any word to keep it here.</Text>
+        ) : (
+          favoriteWords.map((w) => <WordCard key={w.slug} word={w} />)
+        )}
 
-          <WidgetShowcase />
+        <WidgetShowcase />
 
-          <Pressable
+        <Pressable
             style={styles.bookCard}
             onPress={() => {
               lightImpactHaptic();
@@ -228,16 +207,14 @@ export default function StatsScreen() {
               {BOOK_COPY.length > 0 && <Text style={styles.bookBlurb}>{BOOK_COPY}</Text>}
               <Text style={styles.bookCta}>GET THE BOOK →</Text>
             </View>
-          </Pressable>
-        </ScrollView>
-      </Animated.View>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.paper },
-  shakeWrap: { flex: 1 },
   scroll: { paddingHorizontal: space.l, paddingBottom: 112 },
   headerRow: { marginTop: space.s },
   title: {

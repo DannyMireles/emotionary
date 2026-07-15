@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { WordTypeIcon } from '@/components/word-type-icon';
 import type { WordType } from '@/content/types';
 import { color, font, letterSpacing, type, typeMeta } from '@/theme/tokens';
 
@@ -7,7 +8,11 @@ export function TypeBadge({ wordType, muted = false }: { wordType: WordType; mut
   const meta = typeMeta[wordType];
   return (
     <View style={styles.row} accessibilityElementsHidden>
-      <Text style={[styles.glyph, muted && styles.muted]}>{meta.glyph}</Text>
+      <WordTypeIcon
+        wordType={wordType}
+        size={type.badge + 3}
+        color={muted ? color.inkFaint : color.inkMuted}
+      />
       <Text style={[styles.label, muted && styles.muted]}>{meta.label}</Text>
     </View>
   );
@@ -19,10 +24,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-  },
-  glyph: {
-    fontSize: type.badge + 1,
-    color: color.inkMuted,
   },
   label: {
     fontFamily: font.serifMedium,

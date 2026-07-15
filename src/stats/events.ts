@@ -1,1 +1,1 @@
-export const STATS_SHAKE_EVENT = 'emotionary.stats.shake';
+export const STATS_OPEN_EVENT = 'emotionary.stats.open';

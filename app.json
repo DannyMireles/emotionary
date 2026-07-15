@@ -2,7 +2,7 @@
   "expo": {
     "name": "Emotionary",
     "slug": "emotionary",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "emotionary",
@@ -45,11 +45,16 @@
         {
           "photosPermission": false,
           "savePhotosPermission": "Allow Emotionary to save word cards to your photos.",
-          "granularPermissions": ["photo"]
+          "granularPermissions": [
+            "photo"
+          ]
         }
       ],
       "expo-sharing",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

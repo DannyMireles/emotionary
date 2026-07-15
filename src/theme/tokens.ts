@@ -35,10 +35,10 @@ export const levelPalettes: Record<Level, LevelPalette> = {
   5: { tint: '#F0DEEA', deep: '#A93A78', onDeep: '#FDF0F7', accent: '#A93A78' }, // plum / magenta
 };
 
-export const typeMeta: Record<WordType, { label: string; glyph: string }> = {
-  wanderword: { label: 'WANDERWORD', glyph: '🌍' },
-  hidden_english: { label: 'HIDDEN ENGLISH', glyph: '🔍' },
-  psychology: { label: 'CLINICAL', glyph: '🧠' },
+export const typeMeta: Record<WordType, { label: string }> = {
+  wanderword: { label: 'WANDERWORD' },
+  hidden_english: { label: 'HIDDEN ENGLISH' },
+  psychology: { label: 'PSYCHOLOGY' },
 };
 
 export const font = {

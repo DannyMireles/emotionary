@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
+import { WordTypeIcon } from '@/components/word-type-icon';
 import type { Word } from '@/content/types';
 import { selectionHaptic } from '@/feedback/haptics';
-import { color, font, levelPalettes, space, type, typeMeta } from '@/theme/tokens';
+import { color, font, levelPalettes, space, type } from '@/theme/tokens';
 
 /** Browse list card: word + one-line preview, tinted by level (prototype). */
 export function WordCard({ word }: { word: Word }) {
@@ -27,7 +28,12 @@ export function WordCard({ word }: { word: Word }) {
       <Text style={styles.preview} numberOfLines={1}>
         {word.definition}
       </Text>
-      <Text style={styles.glyph}>{typeMeta[word.type].glyph}</Text>
+      <WordTypeIcon
+        wordType={word.type}
+        size={15}
+        color={color.inkFaint}
+        style={styles.glyph}
+      />
     </Pressable>
   );
 }
@@ -56,7 +62,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: space.m,
     top: space.m + 2,
-    fontSize: 13,
-    color: color.inkFaint,
   },
 });

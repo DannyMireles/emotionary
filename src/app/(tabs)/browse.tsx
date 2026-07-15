@@ -3,16 +3,17 @@ import { FlatList, Keyboard, Modal, Pressable, ScrollView, StyleSheet, Text, Tex
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { WordCard } from '@/components/WordCard';
+import { WordTypeIcon } from '@/components/word-type-icon';
 import { useContentStore } from '@/content/store';
 import type { Level, WordType } from '@/content/types';
 import { selectionHaptic } from '@/feedback/haptics';
 import { color, font, letterSpacing, levelPalettes, space, type, typeMeta } from '@/theme/tokens';
 
-const TYPE_FILTERS: { key: WordType | 'all'; label: string; glyph?: string }[] = [
+const TYPE_FILTERS: { key: WordType | 'all'; label: string }[] = [
   { key: 'all', label: 'ALL TYPES' },
-  { key: 'wanderword', label: typeMeta.wanderword.label, glyph: typeMeta.wanderword.glyph },
-  { key: 'hidden_english', label: typeMeta.hidden_english.label, glyph: typeMeta.hidden_english.glyph },
-  { key: 'psychology', label: typeMeta.psychology.label, glyph: typeMeta.psychology.glyph },
+  { key: 'wanderword', label: typeMeta.wanderword.label },
+  { key: 'hidden_english', label: typeMeta.hidden_english.label },
+  { key: 'psychology', label: typeMeta.psychology.label },
 ];
 
 const LEVELS: Level[] = [1, 2, 3, 4, 5];
@@ -93,7 +94,13 @@ export default function BrowseScreen() {
               accessibilityState={{ selected: active }}
               accessibilityLabel={`Filter: ${f.label}`}
             >
-              {f.glyph && <Text style={styles.chipGlyph}>{f.glyph}</Text>}
+              {f.key !== 'all' && (
+                <WordTypeIcon
+                  wordType={f.key}
+                  size={14}
+                  color={active ? color.paper : color.inkMuted}
+                />
+              )}
               <Text style={[styles.chipText, active && styles.chipTextActive]}>{f.label}</Text>
             </Pressable>
           );
@@ -220,18 +227,18 @@ function BrowseKeyModal({ visible, onClose }: { visible: boolean; onClose: () =>
 
             <Text style={styles.modalSection}>ICON KEY</Text>
             <IconKey
-              icon="🌍"
+              wordType="wanderword"
               title="WANDERWORD"
               body="A word from another language or culture that has no direct English equivalent. You'll see a world icon next to a word that has cultural origins."
             />
             <IconKey
-              icon="🔍"
+              wordType="hidden_english"
               title="HIDDEN ENGLISH"
               body="A real English word that exists in the dictionary but rarely makes it into everyday conversation. These have been here all along, but most people were just never introduced to them."
             />
             <IconKey
-              icon="🧠"
-              title="CLINICAL"
+              wordType="psychology"
+              title="PSYCHOLOGY"
               body="A term with roots in psychology simplified here for everyday use. These words belong to everyone, not just those who've sat across from a therapist."
             />
           </ScrollView>
@@ -255,11 +262,19 @@ function KeyLevel({ level, name, body }: { level: Level; name: string; body: str
   );
 }
 
-function IconKey({ icon, title, body }: { icon: string; title: string; body: string }) {
+function IconKey({
+  wordType,
+  title,
+  body,
+}: {
+  wordType: WordType;
+  title: string;
+  body: string;
+}) {
   return (
     <View style={styles.keyLine}>
       <View style={styles.iconKeyWrap}>
-        <Text style={styles.iconKeyText}>{icon}</Text>
+        <WordTypeIcon wordType={wordType} size={17} color={color.inkMuted} />
       </View>
       <View style={styles.keyCopy}>
         <Text style={styles.keyTitle}>{title}</Text>
@@ -334,7 +349,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.card,
   },
   chipActive: { backgroundColor: color.ink, borderColor: color.ink },
-  chipGlyph: { fontSize: 15, lineHeight: 16 },
   chipText: {
     fontFamily: font.serifMedium,
     fontSize: type.badge,
@@ -436,7 +450,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconKeyText: { fontSize: 16 },
   keyCopy: { flex: 1 },
   keyTitle: {
     fontFamily: font.serifSemiBold,
