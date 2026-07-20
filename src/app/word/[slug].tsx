@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SystemIcon } from '@/components/system-icon';
 import { WordFull } from '@/components/WordFull';
 import { findWord, useContentStore } from '@/content/store';
 import { selectionHaptic } from '@/feedback/haptics';
@@ -60,7 +61,7 @@ export default function WordDetailScreen() {
           hitSlop={10}
           style={styles.backButton}
         >
-          <Text style={styles.backGlyph}>←</Text>
+          <SystemIcon name="arrow.left" fallback="←" size={20} color={color.ink} />
         </Pressable>
       </View>
       <WordFull word={word} />
@@ -72,7 +73,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   backRow: { paddingHorizontal: space.m, paddingTop: space.xs },
   backButton: { minWidth: 44, minHeight: 40, justifyContent: 'center' },
-  backGlyph: { fontSize: 22, color: color.ink },
   unavailable: {
     flex: 1,
     backgroundColor: color.paper,

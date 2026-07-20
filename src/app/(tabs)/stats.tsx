@@ -17,7 +17,7 @@ import { StatsBurst } from '@/components/stats-burst';
 import { WordCard } from '@/components/WordCard';
 import { BOOK_COPY, BOOK_THUMBNAIL_URL, BOOK_URL } from '@/config';
 import { findWord, useContentStore } from '@/content/store';
-import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
+import { lightImpactHaptic, mediumImpactHaptic, selectionHaptic } from '@/feedback/haptics';
 import { STATS_OPEN_EVENT } from '@/stats/events';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/tokens';
@@ -121,6 +121,7 @@ export default function StatsScreen() {
     if (now - lastOpenAt.current < 120) return;
     lastOpenAt.current = now;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    mediumImpactHaptic();
     setBurstKey((current) => current + 1);
   }, []);
 

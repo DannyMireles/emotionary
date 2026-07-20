@@ -69,13 +69,12 @@ export function TimeControl({
           <DateTimePicker
             value={toDate(value)}
             mode="time"
-            onChange={(event, date) => {
+            onValueChange={(_event, date) => {
               setShowAndroidPicker(false);
-              if (event.type === 'set' && date) {
-                selectionHaptic();
-                onChange({ hour: date.getHours(), minute: date.getMinutes() });
-              }
+              selectionHaptic();
+              onChange({ hour: date.getHours(), minute: date.getMinutes() });
             }}
+            onDismiss={() => setShowAndroidPicker(false)}
           />
         )}
       </View>
@@ -88,11 +87,9 @@ export function TimeControl({
       mode="time"
       display="spinner"
       style={styles.iosPicker}
-      onChange={(_event, date) => {
-        if (date) {
-          selectionHaptic();
-          onChange({ hour: date.getHours(), minute: date.getMinutes() });
-        }
+      onValueChange={(_event, date) => {
+        selectionHaptic();
+        onChange({ hour: date.getHours(), minute: date.getMinutes() });
       }}
     />
   );

@@ -8,15 +8,13 @@ import {
   type LayoutChangeEvent,
   type ViewToken,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { WordFull } from '@/components/WordFull';
 import type { Word } from '@/content/types';
 import { useContentStore } from '@/content/store';
 import { localDateString } from '@/daily/engine';
 import { dailyFeed } from '@/daily/feed';
 import { useUserStore } from '@/store/userStore';
-import { color, font, type } from '@/theme/tokens';
+import { color, font, levelPalettes, type } from '@/theme/tokens';
 
 const VIEWABILITY_CONFIG = {
   itemVisiblePercentThreshold: 70,
@@ -28,6 +26,7 @@ export default function TodayScreen() {
   const recordOpen = useUserStore((s) => s.recordOpen);
   const markRead = useUserStore((s) => s.markRead);
   const [feedHeight, setFeedHeight] = useState(0);
+  const [visibleLevel, setVisibleLevel] = useState<Word['level']>(1);
 
   const today = localDateString();
   const feed = useMemo(() => dailyFeed(words, today), [words, today]);
@@ -40,7 +39,10 @@ export default function TodayScreen() {
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken<Word>[] }) => {
       const visibleWord = viewableItems.find((token) => token.isViewable)?.item;
-      if (visibleWord) markRead(visibleWord.slug);
+      if (visibleWord) {
+        markRead(visibleWord.slug);
+        setVisibleLevel(visibleWord.level);
+      }
     },
     [markRead],
   );
@@ -54,14 +56,14 @@ export default function TodayScreen() {
 
   if (feed.length === 0) {
     return (
-      <SafeAreaView style={styles.empty} edges={['top']}>
+      <View style={styles.empty}>
         <Text style={styles.emptyText}>No words yet. Check back soon.</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
+    <View style={[styles.screen, { backgroundColor: levelPalettes[visibleLevel].tint }]}>
       <View style={styles.container} onLayout={onLayout}>
         <FlatList
           data={feed}
@@ -73,6 +75,7 @@ export default function TodayScreen() {
           )}
           pagingEnabled={feedHeight > 0}
           decelerationRate="fast"
+          contentInsetAdjustmentBehavior="never"
           showsVerticalScrollIndicator={false}
           viewabilityConfig={VIEWABILITY_CONFIG}
           onViewableItemsChanged={onViewableItemsChanged}
@@ -87,7 +90,7 @@ export default function TodayScreen() {
           accessibilityLabel="Daily word feed"
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

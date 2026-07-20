@@ -1,16 +1,13 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
-import { Text } from 'react-native';
+import type { ImageStyle } from 'expo-image';
+import type { ColorValue, StyleProp } from 'react-native';
 
+import { SystemIcon } from '@/components/system-icon';
 import type { WordType } from '@/content/types';
 
-const symbols: Record<WordType, SymbolViewProps['name']> = {
-  wanderword: { ios: 'globe', android: 'globe', web: 'globe' },
-  hidden_english: {
-    ios: 'building.columns',
-    android: 'account_balance',
-    web: 'account_balance',
-  },
-  psychology: { ios: 'brain', android: 'psychology', web: 'psychology' },
+const symbols: Record<WordType, string> = {
+  wanderword: 'globe',
+  hidden_english: 'building.columns',
+  psychology: 'brain',
 };
 
 const fallbacks: Record<WordType, string> = {
@@ -27,18 +24,16 @@ export function WordTypeIcon({
 }: {
   wordType: WordType;
   size?: number;
-  color: SymbolViewProps['tintColor'];
-  style?: SymbolViewProps['style'];
+  color: ColorValue;
+  style?: StyleProp<ImageStyle>;
 }) {
   return (
-    <SymbolView
+    <SystemIcon
       name={symbols[wordType]}
+      fallback={fallbacks[wordType]}
       size={size}
-      tintColor={color}
-      weight="light"
-      resizeMode="scaleAspectFit"
+      color={color}
       style={style}
-      fallback={<Text style={{ color, fontSize: size }}>{fallbacks[wordType]}</Text>}
     />
   );
 }

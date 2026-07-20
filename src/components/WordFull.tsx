@@ -1,6 +1,8 @@
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SystemIcon } from '@/components/system-icon';
 import { TypeBadge } from '@/components/TypeBadge';
 import type { Word } from '@/content/types';
 import { lightImpactHaptic, selectionHaptic } from '@/feedback/haptics';
@@ -16,71 +18,96 @@ export function WordFull({ word, feedPage = false }: { word: Word; feedPage?: bo
   const isFavorite = useUserStore((s) => s.favorites.includes(word.slug));
   const toggleFavorite = useUserStore((s) => s.toggleFavorite);
   const palette = levelPalettes[word.level];
+  const insets = useSafeAreaInsets();
+
+  const content = (
+    <>
+      <View style={styles.top}>
+        <TypeBadge wordType={word.type} />
+        <Text
+          style={styles.word}
+          maxFontSizeMultiplier={1.4}
+          accessibilityRole="header"
+          accessibilityLabel={`${word.word}. ${word.language}. Level ${word.level}.`}
+        >
+          {word.word}
+        </Text>
+        <Text style={styles.pronunciation} maxFontSizeMultiplier={1.6}>
+          [{word.pronunciation}]
+        </Text>
+        <Text style={styles.origin}>{word.language.toUpperCase()}</Text>
+        <Text style={styles.definition}>{word.definition}</Text>
+      </View>
+
+      <View style={[styles.bottom, feedPage && styles.feedBottom]}>
+        <View style={styles.rule} />
+        <Text style={styles.wisdom}>{word.wisdom}</Text>
+        <Text style={styles.fromBook}>
+          from <Text style={styles.fromBookItalic}>Emotionary</Text>, the book
+        </Text>
+        <View style={styles.actions}>
+          <Pressable
+            onPress={() => {
+              lightImpactHaptic();
+              toggleFavorite(word.slug);
+            }}
+            style={styles.action}
+            accessibilityRole="button"
+            accessibilityLabel={isFavorite ? 'Remove from saved words' : 'Save this word'}
+            hitSlop={8}
+          >
+            <SystemIcon
+              name={isFavorite ? 'heart.fill' : 'heart'}
+              fallback={isFavorite ? '♥' : '♡'}
+              size={21}
+              color={isFavorite ? palette.deep : color.ink}
+            />
+            <Text style={styles.actionLabel}>{isFavorite ? 'SAVED' : 'SAVE'}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              selectionHaptic();
+              router.push(`/share/${word.slug}`);
+            }}
+            style={styles.action}
+            accessibilityRole="button"
+            accessibilityLabel="Share this word as an image card"
+            hitSlop={8}
+          >
+            <SystemIcon
+              name="square.and.arrow.up"
+              fallback="↑"
+              size={21}
+              color={color.ink}
+            />
+            <Text style={styles.actionLabel}>SHARE</Text>
+          </Pressable>
+        </View>
+      </View>
+    </>
+  );
 
   return (
     <View style={[styles.screen, { backgroundColor: palette.tint }]}>
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={[styles.scroll, feedPage && styles.feedScroll]}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={!feedPage}
-        bounces={!feedPage}
-      >
-        <View style={styles.top}>
-          <TypeBadge wordType={word.type} />
-          <Text
-            style={styles.word}
-            maxFontSizeMultiplier={1.4}
-            accessibilityRole="header"
-            accessibilityLabel={`${word.word}. ${word.language}. Level ${word.level}.`}
-          >
-            {word.word}
-          </Text>
-          <Text style={styles.pronunciation} maxFontSizeMultiplier={1.6}>
-            [{word.pronunciation}]
-          </Text>
-          <Text style={styles.origin}>{word.language.toUpperCase()}</Text>
-          <Text style={styles.definition}>{word.definition}</Text>
+      {feedPage ? (
+        <View
+          style={[
+            styles.scroll,
+            styles.feedScroll,
+            { paddingTop: insets.top + space.l, paddingBottom: space.l },
+          ]}
+        >
+          {content}
         </View>
-
-        <View style={[styles.bottom, feedPage && styles.feedBottom]}>
-          <View style={styles.rule} />
-          <Text style={styles.wisdom}>{word.wisdom}</Text>
-          <Text style={styles.fromBook}>
-            from <Text style={styles.fromBookItalic}>Emotionary</Text>, the book
-          </Text>
-          <View style={styles.actions}>
-            <Pressable
-              onPress={() => {
-                lightImpactHaptic();
-                toggleFavorite(word.slug);
-              }}
-              style={styles.action}
-              accessibilityRole="button"
-              accessibilityLabel={isFavorite ? 'Remove from saved words' : 'Save this word'}
-              hitSlop={8}
-            >
-              <Text style={[styles.actionGlyph, isFavorite && { color: palette.deep }]}>
-                {isFavorite ? '♥' : '♡'}
-              </Text>
-              <Text style={styles.actionLabel}>{isFavorite ? 'SAVED' : 'SAVE'}</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                selectionHaptic();
-                router.push(`/share/${word.slug}`);
-              }}
-              style={styles.action}
-              accessibilityRole="button"
-              accessibilityLabel="Share this word as an image card"
-              hitSlop={8}
-            >
-              <Text style={styles.actionGlyph}>⤴</Text>
-              <Text style={styles.actionLabel}>SHARE</Text>
-            </Pressable>
-          </View>
-        </View>
-      </ScrollView>
+      ) : (
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+        >
+          {content}
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -93,10 +120,7 @@ const styles = StyleSheet.create({
     paddingTop: space.xl,
     paddingBottom: 112,
   },
-  feedScroll: {
-    paddingTop: space.l,
-    paddingBottom: space.l,
-  },
+  feedScroll: { flex: 1 },
   top: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start' },
   word: {
     fontFamily: font.display,
@@ -156,7 +180,6 @@ const styles = StyleSheet.create({
     marginTop: space.l,
   },
   action: { alignItems: 'center', gap: 4, minWidth: 44, minHeight: 44, justifyContent: 'center' },
-  actionGlyph: { fontSize: 22, color: color.ink },
   actionLabel: {
     fontFamily: font.serifMedium,
     fontSize: type.badge,
