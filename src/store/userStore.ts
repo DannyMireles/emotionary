@@ -18,6 +18,8 @@ interface UserState {
   streakState: StreakState;
   notifTime: NotifTime;
   notifEnabled: boolean;
+  accessLevel: 'free' | 'full';
+  hapticsEnabled: boolean;
 
   completeOnboarding: () => void;
   toggleFavorite: (slug: string) => void;
@@ -27,6 +29,8 @@ interface UserState {
   recordShare: (slug: string, localDate: string) => boolean;
   setNotifTime: (time: NotifTime) => void;
   setNotifEnabled: (enabled: boolean) => void;
+  unlockFullAccess: () => void;
+  setHapticsEnabled: (enabled: boolean) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -38,8 +42,10 @@ export const useUserStore = create<UserState>()(
       sharedCount: 0,
       lastSharedBySlug: {},
       streakState: { lastOpenDate: null, streak: 0 },
-      notifTime: { hour: 9, minute: 0 },
+      notifTime: { hour: 11, minute: 11 },
       notifEnabled: false,
+      accessLevel: 'free',
+      hapticsEnabled: true,
 
       completeOnboarding: () => set({ onboarded: true }),
 
@@ -66,6 +72,8 @@ export const useUserStore = create<UserState>()(
 
       setNotifTime: (notifTime) => set({ notifTime }),
       setNotifEnabled: (notifEnabled) => set({ notifEnabled }),
+      unlockFullAccess: () => set({ accessLevel: 'full' }),
+      setHapticsEnabled: (hapticsEnabled) => set({ hapticsEnabled }),
     }),
     {
       name: 'emotionary.user.v1',

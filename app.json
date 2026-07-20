@@ -2,13 +2,14 @@
   "expo": {
     "name": "Emotionary",
     "slug": "emotionary",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "emotionary",
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.emotionary.app",
+      "buildNumber": "2026072002",
       "supportsTablet": false
     },
     "android": {
@@ -55,7 +56,30 @@
       "expo-image",
       "expo-status-bar",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.emotionary.app.widgets",
+          "groupIdentifier": "group.com.emotionary.app",
+          "widgets": [
+            {
+              "name": "DailyWord",
+              "displayName": "Emotionary Daily Word",
+              "description": "Keep today's emotion word close on your Home or Lock Screen.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

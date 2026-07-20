@@ -8,7 +8,7 @@ import { font, letterSpacing, levelPalettes } from '@/theme/tokens';
  * The share card — DESIGN.md §10. Designed on a 1080×1920 canvas (Instagram /
  * Facebook Stories) and rendered at any width via a scale factor; capture
  * resizes to exactly 1080×1920. Level-color full-bleed background; the card
- * is the hook — wisdom line and pronunciation deliberately stay off it.
+ * is the hook, with pronunciation included for a complete word reference.
  */
 export const CARD_BASE_WIDTH = 1080;
 export const CARD_BASE_HEIGHT = 1920;
@@ -42,6 +42,18 @@ export function ShareCard({ word, width }: { word: Word; width: number }) {
           adjustsFontSizeToFit
         >
           {word.word}
+        </Text>
+        <Text
+          style={{
+            fontFamily: font.serif,
+            fontSize: 34 * s,
+            color: palette.onDeep,
+            opacity: 0.86,
+            textAlign: 'center',
+            marginTop: 22 * s,
+          }}
+        >
+          [{word.pronunciation}]
         </Text>
         <View
           style={{
@@ -89,7 +101,7 @@ export function ShareCard({ word, width }: { word: Word; width: number }) {
             marginTop: 18 * s,
           }}
         >
-          Get the app + the book → {BOOK_URL_LABEL}
+          Get the app + book{`\n`}→ {BOOK_URL_LABEL}
         </Text>
       </View>
     </View>

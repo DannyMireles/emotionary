@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { findWord, useContentStore } from '@/content/store';
+import { SystemIcon } from '@/components/system-icon';
 import { localDateString } from '@/daily/engine';
 import { lightImpactHaptic, selectionHaptic, successHaptic, warningHaptic } from '@/feedback/haptics';
 import { CARD_BASE_HEIGHT, CARD_BASE_WIDTH, ShareCard } from '@/share/ShareCard';
@@ -20,10 +21,10 @@ import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, space, type } from '@/theme/tokens';
 
 const SHARE_TARGETS = [
-  { key: 'instagram', label: 'Instagram', icon: 'ig' },
-  { key: 'imessage', label: 'iMessage', icon: '✉' },
-  { key: 'facebook', label: 'Facebook', icon: 'f' },
-  { key: 'whatsapp', label: 'WhatsApp', icon: 'wa' },
+  { key: 'messages', label: 'Messages', icon: 'message.fill', fallback: '✉' },
+  { key: 'instagram', label: 'Instagram', icon: 'camera', fallback: '◎' },
+  { key: 'facebook', label: 'Facebook', icon: 'f.cursive', fallback: 'f' },
+  { key: 'whatsapp', label: 'WhatsApp', icon: 'phone.fill', fallback: '☎' },
 ] as const;
 
 export default function ShareModal() {
@@ -167,7 +168,12 @@ export default function ShareModal() {
               accessibilityLabel={`Share to ${target.label}`}
             >
               <View style={styles.targetIcon}>
-                <Text style={styles.targetIconText}>{target.icon}</Text>
+                <SystemIcon
+                  name={target.icon}
+                  fallback={target.fallback}
+                  size={22}
+                  color="#FFFFFF"
+                />
               </View>
               <Text style={styles.targetLabel}>{target.label}</Text>
             </Pressable>
@@ -238,15 +244,11 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  targetIconText: {
-    fontFamily: font.serifSemiBold,
-    fontSize: type.small,
-    color: color.ink,
-    textTransform: 'uppercase',
   },
   targetLabel: {
     fontFamily: font.serif,

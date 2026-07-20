@@ -22,6 +22,7 @@ import { useContentStore } from '@/content/store';
 import { configureNotificationHandler, rebuildQueue } from '@/notifications/scheduler';
 import { useUserStore } from '@/store/userStore';
 import { color } from '@/theme/tokens';
+import { refreshDailyWordWidget } from '@/widgets/timeline';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 configureNotificationHandler();
@@ -68,8 +69,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (!userHydrated || !contentHydrated || !onboarded) return;
     void rebuildQueue({ words, time: notifTime, enabled: notifEnabled });
+    refreshDailyWordWidget(words);
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void rebuildQueue({ words, time: notifTime, enabled: notifEnabled });
+      if (state === 'active') {
+        void rebuildQueue({ words, time: notifTime, enabled: notifEnabled });
+        refreshDailyWordWidget(words);
+      }
     });
     return () => sub.remove();
   }, [userHydrated, contentHydrated, onboarded, words, notifTime, notifEnabled]);
@@ -108,6 +113,7 @@ export default function RootLayout() {
           options={{ presentation: 'transparentModal', animation: 'fade' }}
         />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );

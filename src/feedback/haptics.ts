@@ -1,8 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
+import { useUserStore } from '@/store/userStore';
+
 function run(effect: () => Promise<void>): void {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web' || !useUserStore.getState().hapticsEnabled) return;
   void effect().catch(() => {});
 }
 

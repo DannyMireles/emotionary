@@ -14,7 +14,15 @@ import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/
  * type badge → display-serif word → [pronunciation] → origin → definition,
  * with the wisdom line + SAVE/SHARE anchored at the bottom.
  */
-export function WordFull({ word, feedPage = false }: { word: Word; feedPage?: boolean }) {
+export function WordFull({
+  word,
+  feedPage = false,
+  insideSafeArea = false,
+}: {
+  word: Word;
+  feedPage?: boolean;
+  insideSafeArea?: boolean;
+}) {
   const isFavorite = useUserStore((s) => s.favorites.includes(word.slug));
   const toggleFavorite = useUserStore((s) => s.toggleFavorite);
   const palette = levelPalettes[word.level];
@@ -94,7 +102,7 @@ export function WordFull({ word, feedPage = false }: { word: Word; feedPage?: bo
           style={[
             styles.scroll,
             styles.feedScroll,
-            { paddingTop: insets.top + space.l, paddingBottom: space.l },
+            { paddingTop: insideSafeArea ? space.s : insets.top + space.l, paddingBottom: space.l },
           ]}
         >
           {content}
@@ -121,7 +129,7 @@ const styles = StyleSheet.create({
     paddingBottom: 112,
   },
   feedScroll: { flex: 1 },
-  top: { flexGrow: 1, alignItems: 'center', justifyContent: 'flex-start' },
+  top: { flexGrow: 1, alignItems: 'center', justifyContent: 'center' },
   word: {
     fontFamily: font.display,
     fontSize: 56,
@@ -147,13 +155,14 @@ const styles = StyleSheet.create({
   },
   definition: {
     fontFamily: font.serif,
-    fontSize: 19,
-    lineHeight: 29,
+    fontSize: 21,
+    lineHeight: 32,
     color: color.ink,
     marginTop: space.l,
     width: '100%',
     maxWidth: 330,
     alignSelf: 'center',
+    textAlign: 'center',
   },
   bottom: { alignItems: 'center', marginTop: space.xxl },
   feedBottom: { marginTop: space.xl },

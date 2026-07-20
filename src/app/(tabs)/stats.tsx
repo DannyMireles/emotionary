@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DeviceEventEmitter,
+  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -15,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AmbientInk } from '@/components/AmbientInk';
 import { StatsBurst } from '@/components/stats-burst';
 import { WordCard } from '@/components/WordCard';
-import { BOOK_COPY, BOOK_THUMBNAIL_URL, BOOK_URL } from '@/config';
+import { BOOK_COPY, BOOK_URL } from '@/config';
 import { findWord, useContentStore } from '@/content/store';
 import { lightImpactHaptic, mediumImpactHaptic, selectionHaptic } from '@/feedback/haptics';
 import { STATS_OPEN_EVENT } from '@/stats/events';
@@ -47,12 +48,12 @@ function SettingsMark() {
   );
 }
 
-function WidgetShowcase() {
+function WidgetShowcase({ onOpen }: { onOpen: () => void }) {
   return (
     <View style={styles.widgetWrap}>
       <Text style={styles.section}>WIDGETS</Text>
       <View style={styles.widgetCards}>
-        <View style={styles.widgetCard}>
+        <Pressable style={styles.widgetCard} onPress={onOpen} accessibilityRole="button">
           <View style={styles.homeWidgetPreview}>
             <Text style={styles.widgetWord}>Apricity</Text>
             <Text style={styles.widgetDefinition} numberOfLines={4}>
@@ -61,8 +62,8 @@ function WidgetShowcase() {
           </View>
           <Text style={styles.widgetTitle}>Home Screen</Text>
           <Text style={styles.widgetLink}>CONFIGURE</Text>
-        </View>
-        <View style={styles.widgetCard}>
+        </Pressable>
+        <Pressable style={styles.widgetCard} onPress={onOpen} accessibilityRole="button">
           <View style={styles.lockWidgetPreview}>
             <Text style={styles.lockTime}>11:19</Text>
             <Text style={styles.lockWidgetWord}>Apricity</Text>
@@ -70,7 +71,7 @@ function WidgetShowcase() {
           </View>
           <Text style={styles.widgetTitle}>Lock Screen</Text>
           <Text style={styles.widgetLink}>LEARN HOW</Text>
-        </View>
+        </Pressable>
       </View>
       <View style={styles.widgetSettings}>
         <Text style={styles.widgetSettingsTitle}>Widget Settings</Text>
@@ -88,15 +89,6 @@ function SettingsRow({ label, value }: { label: string; value: string }) {
     <View style={styles.widgetSettingsRow}>
       <Text style={styles.widgetSettingsLabel}>{label}</Text>
       <Text style={styles.widgetSettingsValue}>{value}</Text>
-    </View>
-  );
-}
-
-function BookCoverPlaceholder() {
-  return (
-    <View style={styles.bookCoverPlaceholder}>
-      <Text style={styles.bookCoverTitle}>Emotionary</Text>
-      <Text style={styles.bookCoverAuthor}>THE BOOK</Text>
     </View>
   );
 }
@@ -182,7 +174,15 @@ export default function StatsScreen() {
           favoriteWords.map((w) => <WordCard key={w.slug} word={w} />)
         )}
 
-        <WidgetShowcase />
+        <WidgetShowcase
+          onOpen={() => {
+            selectionHaptic();
+            Alert.alert(
+              'Add the daily widget',
+              'Touch and hold the Home or Lock Screen, tap Edit or Customize, then Add Widget and choose Emotionary.',
+            );
+          }}
+        />
 
         <Pressable
             style={styles.bookCard}
@@ -193,16 +193,12 @@ export default function StatsScreen() {
             accessibilityRole="link"
             accessibilityLabel="Get the book"
           >
-            {BOOK_THUMBNAIL_URL.length > 0 ? (
-              <Image
-                source={{ uri: BOOK_THUMBNAIL_URL }}
-                style={styles.bookCover}
-                contentFit="cover"
-                accessibilityIgnoresInvertColors
-              />
-            ) : (
-              <BookCoverPlaceholder />
-            )}
+            <Image
+              source={require('../../../assets/images/book-cover.png')}
+              style={styles.bookCover}
+              contentFit="contain"
+              accessibilityIgnoresInvertColors
+            />
             <View style={styles.bookInfo}>
               <Text style={styles.bookTitle}>The book</Text>
               {BOOK_COPY.length > 0 && <Text style={styles.bookBlurb}>{BOOK_COPY}</Text>}
@@ -404,30 +400,6 @@ const styles = StyleSheet.create({
     height: 88,
     borderRadius: 4,
     backgroundColor: color.hairline,
-  },
-  bookCoverPlaceholder: {
-    width: 64,
-    height: 88,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: color.ink,
-    backgroundColor: color.card,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: space.s,
-  },
-  bookCoverTitle: {
-    fontFamily: font.display,
-    fontSize: type.caption,
-    color: color.ink,
-    marginTop: space.s,
-  },
-  bookCoverAuthor: {
-    fontFamily: font.serifMedium,
-    fontSize: 7,
-    letterSpacing: 0.6,
-    color: color.inkMuted,
-    marginBottom: space.s,
   },
   bookInfo: { flex: 1 },
   bookTitle: { fontFamily: font.serifSemiBold, fontSize: type.body, color: color.ink },

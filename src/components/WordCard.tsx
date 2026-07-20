@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { router, type Href } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { WordTypeIcon } from '@/components/word-type-icon';
 import type { Word } from '@/content/types';
@@ -7,12 +7,12 @@ import { selectionHaptic } from '@/feedback/haptics';
 import { color, font, levelPalettes, space, type } from '@/theme/tokens';
 
 /** Browse list card: word + one-line preview, tinted by level (prototype). */
-export function WordCard({ word }: { word: Word }) {
+export function WordCard({ word, locked = false }: { word: Word; locked?: boolean }) {
   return (
     <Pressable
       onPress={() => {
         selectionHaptic();
-        router.push(`/word/${word.slug}`);
+        router.push((locked ? '/paywall' : `/word/${word.slug}`) as Href);
       }}
       style={({ pressed }) => [
         styles.card,
@@ -20,14 +20,19 @@ export function WordCard({ word }: { word: Word }) {
         pressed && styles.pressed,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`${word.word}. ${word.definition}`}
+      accessibilityLabel={locked ? `${word.word}. Locked word.` : `${word.word}. ${word.definition}`}
     >
       <Text style={styles.word} maxFontSizeMultiplier={1.6}>
         {word.word}
       </Text>
-      <Text style={styles.preview} numberOfLines={1}>
-        {word.definition}
-      </Text>
+      {locked ? (
+        <View style={styles.lockedRow}>
+          <Text style={styles.preview}>Unlock full access to read this word</Text>
+          <Text style={styles.lock}>LOCKED</Text>
+        </View>
+      ) : (
+        <Text style={styles.preview} numberOfLines={1}>{word.definition}</Text>
+      )}
       <WordTypeIcon
         wordType={word.type}
         size={15}
@@ -62,5 +67,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: space.m,
     top: space.m + 2,
+  },
+  lockedRow: { flexDirection: 'row', alignItems: 'center', gap: space.s, paddingRight: space.l },
+  lock: {
+    fontFamily: font.serifMedium,
+    fontSize: 8,
+    letterSpacing: 0.8,
+    color: color.inkMuted,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.inkMuted,
+    borderRadius: 999,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
   },
 });

@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createAccount, signIn } from '@/auth/client';
 import { AmbientInk } from '@/components/AmbientInk';
+import { Paywall } from '@/components/Paywall';
 import { SystemIcon } from '@/components/system-icon';
 import { formatTime, TimeControl } from '@/components/TimeControl';
 import { WordTypeIcon } from '@/components/word-type-icon';
@@ -24,17 +28,18 @@ import { requestPermission } from '@/notifications/scheduler';
 import type { NotifTime } from '@/store/userStore';
 import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, levelPalettes, space, type } from '@/theme/tokens';
+import { BOOK_URL } from '@/config';
 
 const PAGES = [
   'welcome',
   'daily',
   'key',
-  'levels',
   'drawn',
   'reminder',
   'widget',
   'account',
   'first-word',
+  'paywall',
 ] as const;
 
 type OnboardingPage = (typeof PAGES)[number];
@@ -44,12 +49,12 @@ const pageColors: Record<OnboardingPage, string> = {
   welcome: '#FAF7F0',
   daily: '#F8E8EE',
   key: '#FAF7F0',
-  levels: '#F7EFE4',
   drawn: '#E9EFEA',
   reminder: '#ECE8F4',
   widget: '#F8E8EE',
   account: '#F7EFE4',
   'first-word': '#FAF7F0',
+  paywall: '#F8EEE8',
 };
 
 const DRAWN_TO = [
@@ -60,6 +65,7 @@ const DRAWN_TO = [
 ] as const;
 
 const QUICK_TIMES: NotifTime[] = [
+  { hour: 11, minute: 11 },
   { hour: 7, minute: 0 },
   { hour: 9, minute: 0 },
   { hour: 12, minute: 0 },
@@ -114,7 +120,6 @@ export default function OnboardingScreen() {
 
   const page = PAGES[step];
   const isFirst = step === 0;
-  const isLast = step === PAGES.length - 1;
 
   const finish = () => {
     successHaptic();
@@ -124,8 +129,7 @@ export default function OnboardingScreen() {
 
   const goNext = () => {
     selectionHaptic();
-    if (isLast) finish();
-    else setStep((current) => Math.min(current + 1, PAGES.length - 1));
+    setStep((current) => Math.min(current + 1, PAGES.length - 1));
   };
 
   const goBack = () => {
@@ -191,28 +195,6 @@ export default function OnboardingScreen() {
     <SafeAreaView style={[styles.screen, { backgroundColor: pageColors[page] }]}>
       <AmbientInk />
 
-      <View style={styles.nav}>
-        {!isFirst ? (
-          <Pressable
-            onPress={goBack}
-            style={styles.navButton}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            hitSlop={8}
-          >
-            <SystemIcon name="arrow.left" fallback="←" size={20} color={color.ink} />
-          </Pressable>
-        ) : (
-          <View style={styles.navButton} />
-        )}
-        <View style={styles.dots} accessibilityElementsHidden>
-          {PAGES.map((_, index) => (
-            <View key={index} style={[styles.dot, index === step && styles.dotActive]} />
-          ))}
-        </View>
-        <View style={styles.navButton} />
-      </View>
-
       <KeyboardAvoidingView
         style={styles.keyboard}
         behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined}
@@ -231,7 +213,6 @@ export default function OnboardingScreen() {
             {page === 'welcome' && <WelcomePage reducedMotion={reducedMotion} />}
             {page === 'daily' && <DailyPage reducedMotion={reducedMotion} />}
             {page === 'key' && <KeyPage />}
-            {page === 'levels' && <LevelsPage />}
             {page === 'drawn' && (
               <DrawnPage selected={selectedDrawnTo} onToggle={toggleDrawnTo} />
             )}
@@ -253,30 +234,52 @@ export default function OnboardingScreen() {
               />
             )}
             {page === 'first-word' && <FirstWordPage />}
+            {page === 'paywall' && (
+              <Paywall onContinue={finish} onContinueFree={finish} />
+            )}
           </Animated.View>
         </ScrollView>
 
-        <View style={styles.footer}>
-          {page === 'reminder' ? (
-            <>
-              <PrimaryButton label="ENABLE DAILY WORD" onPress={() => void enableAndContinue()} />
-              <SecondaryButton label="NOT NOW" onPress={goNext} />
-            </>
-          ) : page === 'account' ? (
-            <>
-              <PrimaryButton
-                label={accountComplete ? 'CONTINUE' : authMode === 'create' ? 'CREATE ACCOUNT' : 'SIGN IN'}
-                onPress={accountComplete ? goNext : () => void submitAccount()}
-                busy={authBusy}
-              />
-              {!accountComplete && <SecondaryButton label="NOT NOW" onPress={goNext} />}
-            </>
-          ) : (
-            <PrimaryButton
-              label={isLast ? 'START EXPLORING' : step === 0 ? 'CONTINUE' : 'NEXT'}
-              onPress={goNext}
-            />
+        <View style={[styles.footer, page === 'paywall' && styles.footerDotsOnly]}>
+          {page !== 'paywall' && (
+            <View style={styles.footerActions}>
+              {!isFirst ? (
+                <Pressable
+                  onPress={goBack}
+                  style={styles.backFooterButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="Go back"
+                >
+                  <SystemIcon name="arrow.left" fallback="←" size={20} color={color.ink} />
+                </Pressable>
+              ) : <View style={styles.backFooterButton} />}
+              <View style={styles.footerCtas}>
+                {page === 'reminder' ? (
+                  <>
+                    <PrimaryButton label="ENABLE DAILY WORD" onPress={() => void enableAndContinue()} />
+                    <SecondaryButton label="NOT NOW" onPress={goNext} />
+                  </>
+                ) : page === 'account' ? (
+                  <>
+                    <PrimaryButton
+                      label={accountComplete ? 'CONTINUE' : authMode === 'create' ? 'CREATE ACCOUNT' : 'SIGN IN'}
+                      onPress={accountComplete ? goNext : () => void submitAccount()}
+                      busy={authBusy}
+                    />
+                    {!accountComplete && <SecondaryButton label="NOT NOW" onPress={goNext} />}
+                  </>
+                ) : (
+                  <PrimaryButton label={step === 0 ? 'CONTINUE' : 'NEXT'} onPress={goNext} />
+                )}
+              </View>
+              <View style={styles.backFooterButton} />
+            </View>
           )}
+          <View style={styles.dots} accessibilityElementsHidden>
+            {PAGES.map((_, index) => (
+              <View key={index} style={[styles.dot, index === step && styles.dotActive]} />
+            ))}
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -298,13 +301,19 @@ function WelcomePage({ reducedMotion }: { reducedMotion: boolean }) {
         One word a day. Expand your emotional palette, and recognize life&apos;s most fleeting
         gifts.
       </Text>
-      <View style={styles.bookMini} accessibilityLabel="Emotionary by Keila Shaheen">
-        <Text style={styles.bookMiniTitle} numberOfLines={1} adjustsFontSizeToFit>
-          Emotionary
-        </Text>
-        <Text style={styles.bookMiniAuthor}>KEILA SHAHEEN</Text>
-      </View>
-      <Text style={styles.bookLink}>GET THE BOOK</Text>
+      <Pressable
+        onPress={() => void Linking.openURL(BOOK_URL)}
+        style={styles.bookButton}
+        accessibilityRole="link"
+        accessibilityLabel="Get the Emotionary book"
+      >
+        <Image
+          source={require('../../assets/images/book-cover.png')}
+          style={styles.bookMini}
+          contentFit="contain"
+        />
+        <Text style={styles.bookLink}>GET THE BOOK</Text>
+      </Pressable>
     </View>
   );
 }
@@ -314,9 +323,16 @@ function DailyPage({ reducedMotion }: { reducedMotion: boolean }) {
     <View style={styles.center}>
       <Animated.View
         entering={reducedMotion ? undefined : ZoomIn.delay(80).springify().damping(15)}
-        style={[styles.heroOrb, { backgroundColor: '#E981A5' }]}
-      />
-      <Text style={styles.kicker}>EVERY DAY</Text>
+        style={styles.notificationCard}
+      >
+        <View style={styles.notificationTop}>
+          <BubbleMark compact />
+          <Text style={styles.notificationApp}>EMOTIONARY</Text>
+          <Text style={styles.notificationTime}>11:11</Text>
+        </View>
+        <Text style={styles.notificationTitle}>Your word of the day: Apricity</Text>
+        <Text style={styles.notificationBody}>The warmth of the sun on a cold winter&apos;s day.</Text>
+      </Animated.View>
       <Text style={styles.title} accessibilityRole="header">
         One word.{`\n`}Every day.
       </Text>
@@ -331,7 +347,6 @@ function DailyPage({ reducedMotion }: { reducedMotion: boolean }) {
 function KeyPage() {
   return (
     <View style={styles.center}>
-      <Text style={styles.kicker}>THE KEY</Text>
       <Text style={styles.title} accessibilityRole="header">
         Every word has an origin
       </Text>
@@ -361,43 +376,9 @@ function KeyPage() {
   );
 }
 
-function LevelsPage() {
-  const levels = [
-    [1, 'FLEETING', 'Light, surface sensations'],
-    [2, 'UNDERCURRENTS', 'Subtle feelings beneath the surface'],
-    [3, 'IN-BETWEEN', 'Complex feelings pulling two ways'],
-    [4, 'THE WEIGHT', 'Feelings that demand your attention'],
-    [5, 'THE DEPTHS', 'Transformative human experiences'],
-  ] as const;
-
-  return (
-    <View style={styles.center}>
-      <Text style={styles.kicker}>THE LEVELS</Text>
-      <Text style={styles.title} accessibilityRole="header">
-        A map for intensity
-      </Text>
-      <Text style={styles.body}>Five emotional depths help you find where a feeling lives.</Text>
-      <View style={styles.levelList}>
-        {levels.map(([level, title, body]) => (
-          <View key={level} style={styles.levelRow}>
-            <View style={[styles.levelDot, { backgroundColor: levelPalettes[level].deep }]}>
-              <Text style={styles.levelNumber}>{level}</Text>
-            </View>
-            <View style={styles.levelCopy}>
-              <Text style={styles.levelTitle}>{title}</Text>
-              <Text style={styles.levelBody}>{body}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
 function DrawnPage({ selected, onToggle }: { selected: string[]; onToggle: (label: string) => void }) {
   return (
     <View style={styles.center}>
-      <Text style={styles.kicker}>JUST FOR YOU</Text>
       <Text style={styles.title} accessibilityRole="header">
         What are you drawn to?
       </Text>
@@ -442,7 +423,6 @@ function ReminderPage({
 }) {
   return (
     <View style={styles.center}>
-      <Text style={styles.kicker}>STAY IN THE HABIT</Text>
       <Text style={styles.title} accessibilityRole="header">
         Never miss your word
       </Text>
@@ -476,9 +456,16 @@ function ReminderPage({
 }
 
 function WidgetPage() {
+  const showInstructions = () => {
+    selectionHaptic();
+    Alert.alert(
+      'Add the Emotionary widget',
+      'Touch and hold your Home or Lock Screen, tap Edit or Customize, then Add Widget and choose Emotionary.',
+    );
+  };
+
   return (
     <View style={styles.center}>
-      <Text style={styles.kicker}>BRING IT WITH YOU</Text>
       <Text style={styles.title} accessibilityRole="header">
         Add the daily widget
       </Text>
@@ -502,6 +489,9 @@ function WidgetPage() {
           Emotionary.
         </Text>
       </View>
+      <Pressable onPress={showInstructions} style={styles.widgetButton} accessibilityRole="button">
+        <Text style={styles.widgetButtonText}>HOW TO ADD THE WIDGET</Text>
+      </Pressable>
     </View>
   );
 }
@@ -527,9 +517,10 @@ function AccountPage({
   busy: boolean;
   onSubmit: () => void;
 }) {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
   return (
     <View style={styles.center}>
-      <Text style={styles.kicker}>KEEP YOUR WORDS CLOSE</Text>
       <Text style={styles.title} accessibilityRole="header">
         Your Emotionary account
       </Text>
@@ -570,22 +561,37 @@ function AccountPage({
           style={styles.input}
           accessibilityLabel="Email address"
         />
-        <TextInput
-          value={password}
-          onChangeText={onPasswordChange}
-          placeholder={mode === 'create' ? 'Password (8+ characters)' : 'Password'}
-          placeholderTextColor={color.inkFaint}
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete={mode === 'create' ? 'new-password' : 'current-password'}
-          textContentType={mode === 'create' ? 'newPassword' : 'password'}
-          secureTextEntry
-          returnKeyType="done"
-          onSubmitEditing={onSubmit}
-          editable={!busy}
-          style={styles.input}
-          accessibilityLabel="Password"
-        />
+        <View style={styles.passwordWrap}>
+          <TextInput
+            value={password}
+            onChangeText={onPasswordChange}
+            placeholder={mode === 'create' ? 'Password (8+ characters)' : 'Password'}
+            placeholderTextColor={color.inkFaint}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete={mode === 'create' ? 'new-password' : 'current-password'}
+            textContentType={mode === 'create' ? 'newPassword' : 'password'}
+            secureTextEntry={!passwordVisible}
+            returnKeyType="done"
+            onSubmitEditing={onSubmit}
+            editable={!busy}
+            style={[styles.input, styles.passwordInput]}
+            accessibilityLabel="Password"
+          />
+          <Pressable
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={styles.eyeButton}
+            accessibilityRole="button"
+            accessibilityLabel={passwordVisible ? 'Hide password' : 'Show password'}
+          >
+            <SystemIcon
+              name={passwordVisible ? 'eye.slash' : 'eye'}
+              fallback={passwordVisible ? '◉' : '○'}
+              size={20}
+              color={color.inkMuted}
+            />
+          </Pressable>
+        </View>
       </View>
       {message.length > 0 && (
         <Text style={styles.authMessage} accessibilityLiveRegion="polite" selectable>
@@ -597,46 +603,65 @@ function AccountPage({
 }
 
 function FirstWordPage() {
+  const isSaved = useUserStore((state) => state.favorites.includes('anhedonia'));
+  const toggleFavorite = useUserStore((state) => state.toggleFavorite);
+
   return (
     <View style={styles.center}>
       <Text style={styles.kicker}>YOUR FIRST WORD</Text>
       <View style={styles.firstWord}>
         <View style={styles.firstType}>
-          <WordTypeIcon wordType="hidden_english" size={15} color={color.inkMuted} />
-          <Text style={styles.firstTypeText}>HIDDEN ENGLISH</Text>
+          <WordTypeIcon wordType="psychology" size={15} color={color.inkMuted} />
+          <Text style={styles.firstTypeText}>PSYCHOLOGY</Text>
         </View>
         <Text style={styles.firstWordTitle} accessibilityRole="header">
-          Apricity
+          Anhedonia
         </Text>
-        <Text style={styles.firstPronunciation}>[uh-PRIS-ih-tee]</Text>
-        <Text style={styles.firstOrigin}>ENGLISH · ARCHAIC</Text>
+        <Text style={styles.firstPronunciation}>[an-hee-DOH-nee-ah] 🔊</Text>
+        <Text style={styles.firstOrigin}>GREEK</Text>
         <Text style={styles.firstDefinition}>
-          The warmth of the sun on a cold winter&apos;s day, small, specific, and
-          disproportionately comforting.
+          The reduced ability to feel pleasure; when activities that once brought joy feel flat,
+          distant, or simply beside the point.
         </Text>
         <View style={styles.previewRule} />
-        <Text style={styles.firstWisdom}>Sometimes all you need is five minutes of light.</Text>
+        <Text style={styles.firstWisdom}>
+          Numbness is not the absence of feeling. It&apos;s a feeling asking for help.
+        </Text>
         <View style={styles.previewActions}>
-          <View style={styles.previewAction}>
-            <SystemIcon name="heart" fallback="♡" size={21} color={color.ink} />
-            <Text style={styles.previewActionLabel}>SAVE</Text>
-          </View>
-          <View style={styles.previewAction}>
+          <Pressable
+            onPress={() => {
+              lightImpactHaptic();
+              toggleFavorite('anhedonia');
+            }}
+            style={styles.previewAction}
+            accessibilityRole="button"
+          >
+            <SystemIcon name={isSaved ? 'heart.fill' : 'heart'} fallback={isSaved ? '♥' : '♡'} size={21} color={color.ink} />
+            <Text style={styles.previewActionLabel}>{isSaved ? 'SAVED' : 'SAVE'}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              selectionHaptic();
+              router.push('/share/anhedonia');
+            }}
+            style={styles.previewAction}
+            accessibilityRole="button"
+          >
             <SystemIcon name="square.and.arrow.up" fallback="↑" size={21} color={color.ink} />
             <Text style={styles.previewActionLabel}>SHARE</Text>
-          </View>
+          </Pressable>
         </View>
       </View>
     </View>
   );
 }
 
-function BubbleMark() {
+function BubbleMark({ compact = false }: { compact?: boolean }) {
   return (
-    <View style={styles.bubbleMark} accessibilityElementsHidden>
-      <View style={[styles.markBubble, { backgroundColor: levelPalettes[3].deep }]} />
-      <View style={[styles.markBubble, styles.markOverlap, { backgroundColor: '#D9A629' }]} />
-      <View style={[styles.markBubble, styles.markOverlap, { backgroundColor: '#3F73B3' }]} />
+    <View style={[styles.bubbleMark, compact && styles.bubbleMarkCompact]} accessibilityElementsHidden>
+      <View style={[styles.markBubble, compact && styles.markBubbleCompact, { backgroundColor: levelPalettes[3].deep }]} />
+      <View style={[styles.markBubble, compact && styles.markBubbleCompact, styles.markOverlap, compact && styles.markOverlapCompact, { backgroundColor: '#D9A629' }]} />
+      <View style={[styles.markBubble, compact && styles.markBubbleCompact, styles.markOverlap, compact && styles.markOverlapCompact, { backgroundColor: '#3F73B3' }]} />
     </View>
   );
 }
@@ -674,15 +699,6 @@ function SecondaryButton({ label, onPress }: { label: string; onPress: () => voi
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   keyboard: { flex: 1 },
-  nav: {
-    minHeight: 44,
-    paddingHorizontal: space.m,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    zIndex: 2,
-  },
-  navButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   dots: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: {
     width: 5,
@@ -708,8 +724,11 @@ const styles = StyleSheet.create({
     boxShadow: '0 14px 32px rgba(97, 50, 69, 0.12)',
   },
   bubbleMark: { flexDirection: 'row', marginBottom: space.l },
+  bubbleMarkCompact: { marginBottom: 0 },
   markBubble: { width: 36, height: 36, borderRadius: 18, opacity: 0.88 },
+  markBubbleCompact: { width: 18, height: 18, borderRadius: 9 },
   markOverlap: { marginLeft: -8 },
+  markOverlapCompact: { marginLeft: -5 },
   wordmark: {
     fontFamily: font.display,
     fontSize: 42,
@@ -736,24 +755,10 @@ const styles = StyleSheet.create({
     maxWidth: 290,
   },
   bookMini: {
-    width: 86,
-    height: 116,
-    borderWidth: 1,
-    borderColor: color.ink,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: space.m,
-    marginTop: space.l,
-    backgroundColor: 'rgba(255,255,255,0.56)',
-    boxShadow: '0 8px 18px rgba(55, 43, 29, 0.08)',
+    width: 94,
+    height: 132,
   },
-  bookMiniTitle: { fontFamily: font.display, fontSize: type.body, color: color.ink },
-  bookMiniAuthor: {
-    fontFamily: font.serifMedium,
-    fontSize: 7,
-    letterSpacing: 0.7,
-    color: color.inkMuted,
-  },
+  bookButton: { alignItems: 'center', marginTop: space.l },
   bookLink: {
     fontFamily: font.serifMedium,
     fontSize: type.badge,
@@ -761,6 +766,23 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: space.s,
   },
+  notificationCard: {
+    width: '100%',
+    maxWidth: 330,
+    borderRadius: 22,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.84)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: color.hairline,
+    padding: space.m,
+    marginBottom: space.xl,
+    boxShadow: '0 12px 28px rgba(67, 52, 35, 0.10)',
+  },
+  notificationTop: { flexDirection: 'row', alignItems: 'center' },
+  notificationApp: { fontFamily: font.serifMedium, fontSize: 9, letterSpacing: 1.1, color: color.inkMuted, marginLeft: space.s },
+  notificationTime: { fontFamily: font.serif, fontSize: 10, color: color.inkFaint, marginLeft: 'auto' },
+  notificationTitle: { fontFamily: font.serifSemiBold, fontSize: type.small, color: color.ink, marginTop: space.s },
+  notificationBody: { fontFamily: font.serif, fontSize: type.caption, lineHeight: 18, color: color.inkMuted, marginTop: 2 },
   kicker: {
     fontFamily: font.serifMedium,
     fontSize: type.badge,
@@ -922,6 +944,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginTop: space.s,
   },
+  widgetButton: { minHeight: 42, borderRadius: 999, backgroundColor: color.ink, justifyContent: 'center', paddingHorizontal: space.m, marginTop: space.m },
+  widgetButtonText: { fontFamily: font.serifMedium, fontSize: type.badge, letterSpacing: letterSpacing.caps, color: color.paper },
   authModes: {
     flexDirection: 'row',
     padding: 3,
@@ -939,6 +963,7 @@ const styles = StyleSheet.create({
   },
   authModeTextActive: { color: color.paper },
   authForm: { width: '100%', gap: space.s, marginTop: space.m },
+  passwordWrap: { width: '100%', position: 'relative' },
   input: {
     minHeight: 52,
     borderRadius: 14,
@@ -951,6 +976,8 @@ const styles = StyleSheet.create({
     fontSize: type.small,
     color: color.ink,
   },
+  passwordInput: { paddingRight: 54 },
+  eyeButton: { position: 'absolute', right: 4, top: 4, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   authMessage: {
     fontFamily: font.serif,
     fontSize: type.caption,
@@ -982,7 +1009,7 @@ const styles = StyleSheet.create({
     fontSize: type.body,
     lineHeight: 27,
     color: color.ink,
-    textAlign: 'left',
+    textAlign: 'center',
     marginTop: space.l,
   },
   previewRule: { height: 1, alignSelf: 'stretch', backgroundColor: color.inkMuted, opacity: 0.28, marginTop: space.l },
@@ -1003,15 +1030,19 @@ const styles = StyleSheet.create({
     color: color.inkMuted,
   },
   footer: {
-    minHeight: 90,
+    minHeight: 108,
     paddingHorizontal: space.l,
-    paddingTop: space.s,
-    paddingBottom: space.m,
+    paddingTop: 0,
+    paddingBottom: space.s,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 4,
+    gap: space.s,
     zIndex: 2,
   },
+  footerDotsOnly: { minHeight: 30 },
+  footerActions: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  footerCtas: { alignItems: 'center', minWidth: 190 },
+  backFooterButton: { width: 44, minHeight: 46, alignItems: 'center', justifyContent: 'center' },
   primary: {
     minWidth: 176,
     minHeight: 46,

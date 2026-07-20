@@ -6,7 +6,10 @@ import { WordCard } from '@/components/WordCard';
 import { WordTypeIcon } from '@/components/word-type-icon';
 import { useContentStore } from '@/content/store';
 import type { Level, WordType } from '@/content/types';
+import { localDateString, wordOfDay } from '@/daily/engine';
+import { canViewWord } from '@/entitlements';
 import { selectionHaptic } from '@/feedback/haptics';
+import { useUserStore } from '@/store/userStore';
 import { color, font, letterSpacing, levelPalettes, space, type, typeMeta } from '@/theme/tokens';
 
 const TYPE_FILTERS: { key: WordType | 'all'; label: string }[] = [
@@ -15,8 +18,6 @@ const TYPE_FILTERS: { key: WordType | 'all'; label: string }[] = [
   { key: 'hidden_english', label: typeMeta.hidden_english.label },
   { key: 'psychology', label: typeMeta.psychology.label },
 ];
-
-const LEVELS: Level[] = [1, 2, 3, 4, 5];
 
 function normalize(s: string): string {
   return s
@@ -29,21 +30,21 @@ export default function BrowseScreen() {
   const words = useContentStore((s) => s.words);
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<WordType | 'all'>('all');
-  const [levelFilter, setLevelFilter] = useState<Level | 0>(0);
   const [keyOpen, setKeyOpen] = useState(false);
+  const hasFullAccess = useUserStore((state) => state.accessLevel === 'full');
+  const todaysSlug = wordOfDay(words, localDateString())?.slug ?? null;
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
     return words
       .filter((w) => (typeFilter === 'all' ? true : w.type === typeFilter))
-      .filter((w) => (levelFilter === 0 ? true : w.level === levelFilter))
       .filter((w) =>
         q.length === 0 ? true : normalize(w.word).includes(q) || normalize(w.definition).includes(q),
       )
       .sort((a, b) => a.word.localeCompare(b.word));
-  }, [words, query, typeFilter, levelFilter]);
+  }, [words, query, typeFilter]);
 
-  const hasActiveFilters = query.length > 0 || typeFilter !== 'all' || levelFilter !== 0;
+  const hasActiveFilters = query.length > 0 || typeFilter !== 'all';
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
@@ -107,50 +108,15 @@ export default function BrowseScreen() {
         })}
       </View>
 
-      <View style={styles.levelRow}>
-        <Pressable
-          onPress={() => {
-            Keyboard.dismiss();
-            selectionHaptic();
-            setLevelFilter(0);
-          }}
-          style={styles.levelAll}
-          accessibilityRole="button"
-          accessibilityState={{ selected: levelFilter === 0 }}
-          accessibilityLabel="All levels"
-        >
-          <Text style={[styles.levelAllText, levelFilter === 0 && styles.levelAllActive]}>
-            ALL LEVELS
-          </Text>
-        </Pressable>
-        {LEVELS.map((lvl) => {
-          const active = levelFilter === lvl;
-          return (
-            <Pressable
-              key={lvl}
-              onPress={() => {
-                Keyboard.dismiss();
-                selectionHaptic();
-                setLevelFilter(active ? 0 : lvl);
-              }}
-              style={[
-                styles.levelDot,
-                { backgroundColor: levelPalettes[lvl].deep },
-                active && styles.levelDotActive,
-              ]}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={`Level ${lvl}`}
-              hitSlop={6}
-            />
-          );
-        })}
-      </View>
-
       <FlatList
         data={filtered}
         keyExtractor={(w) => w.slug}
-        renderItem={({ item }) => <WordCard word={item} />}
+        renderItem={({ item }) => (
+          <WordCard
+            word={item}
+            locked={!canViewWord(item, todaysSlug, hasFullAccess)}
+          />
+        )}
         contentContainerStyle={styles.list}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -165,7 +131,6 @@ export default function BrowseScreen() {
                   selectionHaptic();
                   setQuery('');
                   setTypeFilter('all');
-                  setLevelFilter(0);
                 }}
                 accessibilityRole="button"
               >
